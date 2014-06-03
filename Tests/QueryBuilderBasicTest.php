@@ -214,6 +214,39 @@ class QueryBuilderBasicTest extends PHPUnit_Framework_TestCase
     }
 
     /**
+     * @depends testBuildWhere
+     */
+    public function testBuildWhereIn()
+    {
+        $query = QueryModel::query()
+            ->whereIn('number', array(10, 7, 80.76))
+            ->build();
+        $this->assertEquals(
+            'SELECT * FROM `test` WHERE `number` IN (?, ?, ?)',
+            $query->getQuery()
+        );
+        $this->assertEquals(
+            array(10, 7, 80.76),
+            $query->getParams()
+        );
+
+        // build extended
+        $queryExtended = QueryModel::query()
+            ->where('number', 10)
+            ->whereIn('number', array(10, 7, 80.76))
+            ->where('id', 18)
+            ->build();
+        $this->assertEquals(
+            'SELECT * FROM `test` WHERE `number` = ? AND `number` IN (?, ?, ?) AND `id` = ?',
+            $queryExtended->getQuery()
+        );
+        $this->assertEquals(
+            array(10, 10, 7, 80.76, 18),
+            $queryExtended->getParams()
+        );
+    }
+
+    /**
      * @depends testBuild
      */
     public function testOrder()

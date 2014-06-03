@@ -201,6 +201,20 @@ class QueryBuilder extends Query
         return $this;
     }
 
+    /**
+     * @param string $column
+     * @param array $data
+     * @return $this
+     */
+    public function whereIn($column, array $data)
+    {
+        $this->where[] = Rorm::quoteIdentifier($column) . ' IN (' .
+            substr(str_repeat('?, ', count($data)), 0, -2) .
+            ')';
+        $this->whereParams = array_merge($this->whereParams, $data);
+        return $this;
+    }
+
     // group
 
     // having
