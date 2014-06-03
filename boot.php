@@ -18,13 +18,9 @@ set_include_path(
 spl_autoload_register(
     function ($class) {
         // namespaces
-        $namespace = 'Rorm\\';
         $namespaceTest = 'RormTest\\';
 
-        if (strpos($class, $namespace) === 0) {
-            $class = substr($class, strlen($namespace));
-            $directories = array(__DIR__ . '/Source/');
-        } elseif (strpos($class, $namespaceTest) === 0) {
+        if (strpos($class, $namespaceTest) === 0) {
             $class = substr($class, strlen($namespaceTest));
             $directories = array(
                 __DIR__ . '/Tests/',
@@ -47,5 +43,9 @@ spl_autoload_register(
     }
 );
 
+// include Rorm
+require 'include.php';
+
+// boot database connections
 require 'boot-mysql.php';
 require 'boot-sqlite.php';
