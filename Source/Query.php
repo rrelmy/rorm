@@ -12,6 +12,9 @@ use PDOStatement;
  */
 class Query
 {
+    /** @var PDO */
+    protected $db;
+
     /** @var string */
     protected $class;
 
@@ -29,11 +32,13 @@ class Query
 
     /**
      * @param string $class
+     * @param PDO $db
      */
-    public function __construct($class = 'stdClass')
+    public function __construct($class = 'stdClass', PDO $db = null)
     {
         $this->class = $class;
         $this->classIsOrmModel = is_subclass_of($this->class, '\\Rorm\\Model');
+        $this->db = $db ? $db : Rorm::getDatabase();
     }
 
     /**
@@ -83,7 +88,7 @@ class Query
      */
     protected function execute()
     {
-        $this->statement = Rorm::$db->prepare($this->query);
+        $this->statement = $this->db->prepare($this->query);
         $this->statement->setFetchMode(PDO::FETCH_ASSOC);
         return $this->statement->execute($this->params);
     }

@@ -15,6 +15,12 @@ use Rorm\Model;
  */
 class ModelSQLite extends Model
 {
+    /** @var string */
     public static $_table = 'modelsqlite';
+
+    /** @var string */
     public static $_idColumn = 'rowid';
+
+    /** @var string */
+    public static $_connection = 'sqlite';
 }

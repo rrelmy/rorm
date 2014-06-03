@@ -25,7 +25,6 @@ TODO
 ----
  - Documentation
  - Support other database drivers such as PostgreSQL
- - Multiple database connections
 
 Ideas
 -----
@@ -42,11 +41,18 @@ There is not special support for relations, but its easy to integrate it yoursel
 Error handling
 --------------
 It is a good idea to use the PDO exception error mode.
-Rorm has no special error handling and does not catch thrown excpetions!
+Rorm has no special error handling and does not catch thrown exceptions!
 
 Unbuffered queries
 ------------------
 You can use unbuffered queries with the findMany method, but you have to be aware that
 no queries can be executed until the iteration is finished.
 
-No special method are supplied for configure unbuffered queries. You may use the PDO Attributes yourself.
+No special method are supplied for configure unbuffered queries. You may use the PDO attributes yourself.
+
+Multiple database connections
+-----------------------------
+
+You can set multiple database connections to the Rorm config with the ```setDatabase($db, 'name')``` method.
+
+Each model can have different database connection which can be configure with the ```$_connection``` property.

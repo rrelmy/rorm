@@ -34,12 +34,13 @@ class QueryBuilder extends Query
      * @param string $table
      * @param string|array $idColumn
      * @param string $class
+     * @param \PDO $db
      */
-    public function __construct($table, $idColumn, $class = 'stdClass')
+    public function __construct($table, $idColumn, $class = 'stdClass', \PDO $db = null)
     {
         $this->table = $table;
         $this->idColumn = is_array($idColumn) ? $idColumn : array($idColumn);
-        parent::__construct($class);
+        parent::__construct($class, $db);
     }
 
     /**

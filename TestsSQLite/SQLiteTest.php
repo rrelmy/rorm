@@ -11,48 +11,19 @@ use Rorm\Rorm;
  */
 class SQLiteTest extends PHPUnit_Framework_TestCase
 {
-    protected static $backupDb;
-
-    public static function setUpBeforeClass()
+    public function testModels()
     {
-        // backup database
-        self::$backupDb = Rorm::$db;
+        $sqliteDatabase = Rorm::getDatabase('sqlite');
+        $this->assertInstanceOf('PDO', $sqliteDatabase);
+        $this->assertEquals($sqliteDatabase->getAttribute(PDO::ATTR_DRIVER_NAME), 'sqlite');
 
-        // create sqlite database
-        $dbh = new PDO('sqlite::memory:');
-        $dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        Rorm::setDatabase($dbh);
-
-        // setup database
-        $dbh->exec('DROP TABLE IF EXISTS modelsqlite');
-        $dbh->exec(
-            'CREATE TABLE modelsqlite (
-                 rowid INTEGER PRIMARY KEY AUTOINCREMENT,
-                 name TEXT NOT NULL,
-                 number REAL,
-                 active INTEGER,
-                 deleted INTEGER
-            );'
-        );
-        $dbh->exec('DROP TABLE IF EXISTS modelsqlitecompound');
-        $dbh->exec(
-            'CREATE TABLE modelsqlitecompound (
-                foo_id INTEGER,
-                bar_id INTEGER,
-                name TEST,
-                rank INTEGER,
-                PRIMARY KEY(foo_id, bar_id)
-            );'
-        );
+        $this->assertEquals($sqliteDatabase, ModelSQLite::getDatabase());
+        $this->assertEquals($sqliteDatabase, ModelSQLiteCompound::getDatabase());
     }
 
-    public static function tearDownAfterClass()
-    {
-        // restore database
-        Rorm::setDatabase(self::$backupDb);
-    }
-
-
+    /**
+     * @depends testModels
+     */
     public function testBasic()
     {
         $model = ModelSQLite::create();

@@ -14,15 +14,30 @@ use PDO;
  */
 class Rorm
 {
-    /** @var PDO */
-    public static $db;
+    const CONNECTION_DEFAULT = 'default';
+
+    /** @var PDO[] */
+    protected static $connections;
 
     /**
      * @param PDO $dbh
+     * @param string $connection
      */
-    public static function setDatabase(PDO $dbh)
+    public static function setDatabase(PDO $dbh, $connection = self::CONNECTION_DEFAULT)
     {
-        self::$db = $dbh;
+        self::$connections[$connection] = $dbh;
+    }
+
+    /**
+     * @param string $connection
+     * @return PDO|null
+     */
+    public static function getDatabase($connection = self::CONNECTION_DEFAULT)
+    {
+        if (array_key_exists($connection, self::$connections)) {
+            return self::$connections[$connection];
+        }
+        return null;
     }
 
     /**

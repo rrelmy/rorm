@@ -46,3 +46,6 @@ spl_autoload_register(
         return false;
     }
 );
+
+require 'boot-mysql.php';
+require 'boot-sqlite.php';

@@ -5,6 +5,7 @@
 namespace RormTest;
 
 use PHPUnit_Framework_TestCase;
+use Rorm\Model;
 use Rorm\Rorm;
 
 /**
@@ -13,11 +14,28 @@ use Rorm\Rorm;
 class RormTest extends PHPUnit_Framework_TestCase
 {
 
+    public function testDefaultConnection()
+    {
+        $this->assertEquals(
+            Model::$_connection,
+            Rorm::CONNECTION_DEFAULT
+        );
+    }
+
+    public function testGetDatabase()
+    {
+        $this->assertInstanceOf('PDO', Rorm::getDatabase());
+        $this->assertNull(Rorm::getDatabase('unknown_connection'));
+    }
+
+    /**
+     * @depends testGetDatabase
+     */
     public function testSetDatabase()
     {
-        $db = Rorm::$db;
+        $db = Rorm::getDatabase();
         Rorm::setDatabase($db);
-        $this->assertEquals($db, Rorm::$db);
+        $this->assertEquals($db, Rorm::getDatabase());
     }
 
     /**

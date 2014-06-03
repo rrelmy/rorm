@@ -26,6 +26,9 @@ abstract class Model implements Iterator, JsonSerializable
     /** @var array */
     public static $_ignoreFields = array();
 
+    /** @var string */
+    public static $_connection = Rorm::CONNECTION_DEFAULT;
+
     /** @var array */
     public $_data = array();
 
@@ -39,6 +42,14 @@ abstract class Model implements Iterator, JsonSerializable
         }
 
         return strtolower(str_replace('\\', '_', get_called_class()));
+    }
+
+    /**
+     * @return \PDO|null
+     */
+    public static function getDatabase()
+    {
+        return Rorm::getDatabase(static::$_connection);
     }
 
     /**
@@ -65,7 +76,7 @@ abstract class Model implements Iterator, JsonSerializable
      */
     public static function query()
     {
-        return new QueryBuilder(static::getTable(), static::$_idColumn, get_called_class());
+        return new QueryBuilder(static::getTable(), static::$_idColumn, get_called_class(), static::getDatabase());
     }
 
     /**
@@ -75,7 +86,7 @@ abstract class Model implements Iterator, JsonSerializable
      */
     public static function customQuery($query, array $params = array())
     {
-        $ormQuery = new Query(get_called_class());
+        $ormQuery = new Query(get_called_class(), static::getDatabase());
         $ormQuery->setQuery($query);
         if ($params) {
             $ormQuery->setParams($params);
@@ -109,6 +120,8 @@ abstract class Model implements Iterator, JsonSerializable
             throw new QueryException('can not save empty data!');
         }
 
+        $db = static::getDatabase();
+
         // ignore fields
         $notSetFields = static::$_ignoreFields;
 
@@ -127,14 +140,14 @@ abstract class Model implements Iterator, JsonSerializable
                 continue;
             }
             $columns[] = Rorm::quoteIdentifier($fieldName);
-            $values[] = Rorm::$db->quote($value);
+            $values[] = $db->quote($value);
         }
 
         $sql .= '(' . implode(',', $columns) . ') VALUES (' . implode(', ', $values) . ')';
         unset($columns, $values);
 
         // execute (most likely throws PDOException if there is an error)
-        if (!Rorm::$db->exec($sql)) {
+        if (!$db->exec($sql)) {
             // @codeCoverageIgnoreStart
             // ignore cover coverage because there should be no way to trigger this error (error mode exception)
             return false;
@@ -144,7 +157,7 @@ abstract class Model implements Iterator, JsonSerializable
         // update generated id
         if (static::$_autoId && $this->getId() === null) {
             // last insert id
-            $this->set(static::$_idColumn, Rorm::$db->lastInsertId());
+            $this->set(static::$_idColumn, $db->lastInsertId());
         }
 
         return true;
@@ -155,6 +168,8 @@ abstract class Model implements Iterator, JsonSerializable
      */
     public function delete()
     {
+        $db = static::getDatabase();
+
         $sql = '
 			DELETE FROM ' . Rorm::quoteIdentifier(static::getTable()) . '
 			WHERE
@@ -166,10 +181,10 @@ abstract class Model implements Iterator, JsonSerializable
             $idColumns = array($idColumns);
         }
         foreach ($idColumns as $columnName) {
-            $sql .= ' AND ' . Rorm::quoteIdentifier($columnName) . ' = ' . Rorm::$db->quote($this->$columnName);
+            $sql .= ' AND ' . Rorm::quoteIdentifier($columnName) . ' = ' . $db->quote($this->$columnName);
         }
 
-        return Rorm::$db->exec($sql) > 0;
+        return $db->exec($sql) > 0;
     }
 
     // data access

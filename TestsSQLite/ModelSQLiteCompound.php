@@ -21,4 +21,7 @@ class ModelSQLiteCompound extends Model
 
     /** @var bool */
     public static $_autoId = false;
+
+    /** @var string */
+    public static $_connection = 'sqlite';
 }
