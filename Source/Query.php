@@ -135,9 +135,7 @@ class Query
         if ($this->execute()) {
             return $this->fetch();
         }
-        // @codeCoverageIgnoreStart
         return null;
-        // @codeCoverageIgnoreEnd
     }
 
     /**

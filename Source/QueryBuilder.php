@@ -10,6 +10,9 @@ namespace Rorm;
  */
 class QueryBuilder extends Query
 {
+    /** @var callable */
+    protected $quoteIdentifier;
+
     /** @var string */
     protected $table;
 
@@ -17,11 +20,16 @@ class QueryBuilder extends Query
     protected $idColumn;
 
     // query
+    /** @var array */
     public $select = array();
 
+    /** @var array */
     public $where = array();
+
+    /** @var array */
     public $whereParams = array();
 
+    /** @var array */
     public $order = array();
 
     /** @var int */
@@ -38,9 +46,22 @@ class QueryBuilder extends Query
      */
     public function __construct($table, $idColumn, $class = 'stdClass', \PDO $db = null)
     {
+        parent::__construct($class, $db);
+
         $this->table = $table;
         $this->idColumn = is_array($idColumn) ? $idColumn : array($idColumn);
-        parent::__construct($class, $db);
+        $this->quoteIdentifier = Rorm::getIdentifierQuoter($this->db);
+    }
+
+    /**
+     * @param string $identifier
+     * @return string
+     */
+    public function quoteIdentifier($identifier)
+    {
+        // TODO there must be an easier way to do this without an extra variable!
+        $func = $this->quoteIdentifier;
+        return $func($identifier);
     }
 
     /**
@@ -59,9 +80,9 @@ class QueryBuilder extends Query
      */
     public function select($column, $as = null)
     {
-        $select = Rorm::quoteIdentifier($column);
+        $select = $this->quoteIdentifier($column);
         if ($as !== null) {
-            $select .= ' AS ' . Rorm::quoteIdentifier($as);
+            $select .= ' AS ' . $this->quoteIdentifier($as);
         }
         $this->select[] = $select;
 
@@ -77,7 +98,7 @@ class QueryBuilder extends Query
     {
         $select = $expression;
         if ($as !== null) {
-            $select .= ' AS ' . Rorm::quoteIdentifier($as);
+            $select .= ' AS ' . $this->quoteIdentifier($as);
         }
         $this->select[] = $select;
 
@@ -93,7 +114,7 @@ class QueryBuilder extends Query
      */
     public function where($column, $value)
     {
-        $this->where[] = Rorm::quoteIdentifier($column) . ' = ?';
+        $this->where[] = $this->quoteIdentifier($column) . ' = ?';
         $this->whereParams[] = $value;
         return $this;
     }
@@ -126,7 +147,7 @@ class QueryBuilder extends Query
      */
     public function whereExpr($column, $expression)
     {
-        $this->where[] = Rorm::quoteIdentifier($column) . ' = ' . $expression;
+        $this->where[] = $this->quoteIdentifier($column) . ' = ' . $expression;
         return $this;
     }
 
@@ -151,7 +172,7 @@ class QueryBuilder extends Query
      */
     public function whereLt($column, $value)
     {
-        $this->where[] = Rorm::quoteIdentifier($column) . ' < ?';
+        $this->where[] = $this->quoteIdentifier($column) . ' < ?';
         $this->whereParams[] = $value;
         return $this;
     }
@@ -163,7 +184,7 @@ class QueryBuilder extends Query
      */
     public function whereLte($column, $value)
     {
-        $this->where[] = Rorm::quoteIdentifier($column) . ' <= ?';
+        $this->where[] = $this->quoteIdentifier($column) . ' <= ?';
         $this->whereParams[] = $value;
         return $this;
     }
@@ -175,7 +196,7 @@ class QueryBuilder extends Query
      */
     public function whereGt($column, $value)
     {
-        $this->where[] = Rorm::quoteIdentifier($column) . ' > ?';
+        $this->where[] = $this->quoteIdentifier($column) . ' > ?';
         $this->whereParams[] = $value;
         return $this;
     }
@@ -187,7 +208,7 @@ class QueryBuilder extends Query
      */
     public function whereGte($column, $value)
     {
-        $this->where[] = Rorm::quoteIdentifier($column) . ' >= ?';
+        $this->where[] = $this->quoteIdentifier($column) . ' >= ?';
         $this->whereParams[] = $value;
         return $this;
     }
@@ -198,7 +219,7 @@ class QueryBuilder extends Query
      */
     public function whereNotNull($column)
     {
-        $this->where[] = Rorm::quoteIdentifier($column) . ' IS NOT NULL';
+        $this->where[] = $this->quoteIdentifier($column) . ' IS NOT NULL';
         return $this;
     }
 
@@ -209,7 +230,7 @@ class QueryBuilder extends Query
      */
     public function whereIn($column, array $data)
     {
-        $this->where[] = Rorm::quoteIdentifier($column) . ' IN (' .
+        $this->where[] = $this->quoteIdentifier($column) . ' IN (' .
             substr(str_repeat('?, ', count($data)), 0, -2) .
             ')';
         $this->whereParams = array_merge($this->whereParams, $data);
@@ -227,7 +248,7 @@ class QueryBuilder extends Query
      */
     public function orderByAsc($column)
     {
-        $this->order[] = Rorm::quoteIdentifier($column) . ' ASC';
+        $this->order[] = $this->quoteIdentifier($column) . ' ASC';
         return $this;
     }
 
@@ -237,7 +258,7 @@ class QueryBuilder extends Query
      */
     public function orderByDesc($column)
     {
-        $this->order[] = Rorm::quoteIdentifier($column) . ' DESC';
+        $this->order[] = $this->quoteIdentifier($column) . ' DESC';
         return $this;
     }
 
@@ -281,7 +302,7 @@ class QueryBuilder extends Query
         }
 
         // from
-        $query .= ' FROM ' . Rorm::quoteIdentifier($this->table);
+        $query .= ' FROM ' . $this->quoteIdentifier($this->table);
 
         // where
         if ($this->where) {

@@ -17,7 +17,6 @@ class ModelExtendedTest extends PHPUnit_Framework_TestCase
         $this->assertEquals('test_table', FixedName::getTable());
     }
 
-
     public function testQuery()
     {
         $query = Test_Basic::query();

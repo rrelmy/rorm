@@ -8,6 +8,7 @@ namespace Rorm;
 use stdClass;
 use Iterator;
 use JsonSerializable;
+use PDO;
 
 /**
  * Class Model
@@ -112,6 +113,25 @@ abstract class Model implements Iterator, JsonSerializable
 
     /**
      * @return bool
+     */
+    public function hasId()
+    {
+        if (is_array(static::$_idColumn)) {
+            foreach (static::$_idColumn as $key) {
+                $value = $this->get($key);
+                if (empty($value)) {
+                    return false;
+                }
+            }
+            return true;
+        } else {
+            $value = $this->get(static::$_idColumn);
+            return !empty($value);
+        }
+    }
+
+    /**
+     * @return bool
      * @throws QueryException
      */
     public function save()
@@ -121,43 +141,150 @@ abstract class Model implements Iterator, JsonSerializable
         }
 
         $db = static::getDatabase();
+        $quoteIdentifier = Rorm::getIdentifierQuoter($db);
+        $quotedTable = $quoteIdentifier(static::getTable());
 
         // ignore fields
         $notSetFields = static::$_ignoreFields;
 
         // prepare query
+
         // MySQL and SQLite support REPLACE INTO
         // In SQLite REPLACE INTO is a alias for INSERT INTO OR REPLACE
-        $sql = 'REPLACE INTO';
-        $sql .= ' ' . Rorm::quoteIdentifier(static::getTable());
+        if ($db->isPostgreSQL) {
+            /**
+             * PostgreSQL, we use the sample syntax from the wiki for a merge
+             * @see http://www.postgresql.org/docs/current/static/plpgsql-control-structures.html#PLPGSQL-UPSERT-EXAMPLE
+             */
 
-        // (column) VALUES (value)
-        $columns = array();
-        $values = array();
-
-        foreach ($this->_data as $fieldName => $value) {
-            if (in_array($fieldName, $notSetFields)) {
-                continue;
+            $idColumns = static::$_idColumn;
+            if (!is_array($idColumns)) {
+                $idColumns = array($idColumns);
             }
-            $columns[] = Rorm::quoteIdentifier($fieldName);
-            $values[] = $db->quote($value);
-        }
 
-        $sql .= '(' . implode(',', $columns) . ') VALUES (' . implode(', ', $values) . ')';
-        unset($columns, $values);
+            $doMerge = $this->hasId();
 
-        // execute (most likely throws PDOException if there is an error)
-        if (!$db->exec($sql)) {
-            // @codeCoverageIgnoreStart
-            // ignore cover coverage because there should be no way to trigger this error (error mode exception)
-            return false;
-            // @codeCoverageIgnoreEnd
-        }
+            if ($doMerge) {
+                $sqlColumnsSet = array();
+                $sqlWhere = array();
+            }
 
-        // update generated id
-        if (static::$_autoId && $this->getId() === null) {
-            // last insert id
-            $this->set(static::$_idColumn, $db->lastInsertId());
+            $quotedData = array();
+
+            foreach ($this->_data as $column => $value) {
+                if (in_array($column, $notSetFields)) {
+                    continue;
+                }
+
+                $isIdColumn = in_array($column, $idColumns);
+                $column = $quoteIdentifier($column);
+                $value = Rorm::quote($db, $value);
+
+                $quotedData[$column] = $value;
+
+                if ($doMerge) {
+                    if ($isIdColumn) {
+                        $sqlWhere[] = $column . ' = ' . $value;
+                    } else {
+                        $sqlColumnsSet[] = $column . ' = ' . $value;
+                    }
+                }
+            }
+
+            $sqlColumnsValues =
+                '(' . implode(', ', array_keys($quotedData)) . ')' .
+                ' VALUES ' .
+                '(' . implode(', ', $quotedData) . ')';
+
+            if ($doMerge) {
+                // merge
+                $sqlColumnsSet = implode(', ', $sqlColumnsSet);
+                $sqlWhere = implode(' AND ', $sqlWhere);
+
+                $sql =
+                    'CREATE OR REPLACE FUNCTION rorm_merge()  RETURNS VOID AS
+                    $$
+                    BEGIN
+                        LOOP
+                            -- first try to update the key
+                            UPDATE ' . $quotedTable . ' SET ' . $sqlColumnsSet . ' WHERE ' . $sqlWhere . ';
+                        IF found THEN
+                            RETURN;
+                        END IF;
+                        -- not there, so try to insert the key
+                        -- if someone else inserts the same key concurrently,
+                        -- we could get a unique-key failure
+                        BEGIN
+                            INSERT INTO ' . $quotedTable . ' ' . $sqlColumnsValues . ';
+                            RETURN;
+                        EXCEPTION WHEN unique_violation THEN
+                            -- Do nothing, and loop to try the UPDATE again.
+                        END;
+                    END LOOP;
+                END;
+                $$
+                LANGUAGE plpgsql;
+
+                SELECT rorm_merge();';
+
+                // execute (most likely throws PDOException if there is an error)
+                if ($db->exec($sql) === false) {
+                    echo '***************** FAIL merge ********************';
+
+                    return false;
+                }
+            } else {
+                // basic insert
+                $sql =
+                    'INSERT INTO ' . $quotedTable . ' ' .
+                    $sqlColumnsValues .
+                    ' RETURNING ' . $quoteIdentifier(static::$_idColumn);
+
+                // execute (most likely throws PDOException if there is an error)
+                $stmt = $db->query($sql);
+                if (!$stmt) {
+                    echo '***************** FAIL insert ********************';
+                    return false;
+                }
+
+                // update generated id
+                if (static::$_autoId && !$this->hasId()) {
+                    // last insert id
+                    $this->set(static::$_idColumn, $stmt->fetchColumn());
+                }
+            }
+
+        } else {
+            // tested with MySQL and SQLite
+            $sql = 'REPLACE INTO ' . $quotedTable . ' ';
+
+            // (column) VALUES (value)
+            $quotedData = array();
+            foreach ($this->_data as $column => $value) {
+                if (in_array($column, $notSetFields)) {
+                    continue;
+                }
+
+                /**
+                 * Use PDO::quote on all data types, MySQL and SQLite forgive about everything you can do here
+                 * but probably it would be nicer (and faster?) to check type (see PostgreSQL part)
+                 */
+                $quotedData[$quoteIdentifier($column)] = $db->quote($value);
+            }
+
+            $sql .= '(' . implode(', ', array_keys($quotedData)) . ') VALUES (' . implode(', ', $quotedData) . ')';
+
+            // execute (most likely throws PDOException if there is an error)
+            if (!$db->exec($sql)) {
+                echo '***************** FAIL sql ********************';
+                return false;
+            }
+
+            // update generated id
+            if (static::$_autoId && !$this->hasId()) {
+                // last insert id
+                $this->set(static::$_idColumn, $db->lastInsertId());
+            }
         }
 
         return true;
@@ -169,20 +296,19 @@ abstract class Model implements Iterator, JsonSerializable
     public function delete()
     {
         $db = static::getDatabase();
-
-        $sql = '
-			DELETE FROM ' . Rorm::quoteIdentifier(static::getTable()) . '
-			WHERE
-				1
-		'; // the 1 has it's purpose
+        $quoteIdentifier = Rorm::getIdentifierQuoter($db);
 
         $idColumns = static::$_idColumn;
         if (!is_array($idColumns)) {
             $idColumns = array($idColumns);
         }
+
+        $where = array();
         foreach ($idColumns as $columnName) {
-            $sql .= ' AND ' . Rorm::quoteIdentifier($columnName) . ' = ' . $db->quote($this->$columnName);
+            $where[] = $quoteIdentifier($columnName) . ' = ' . Rorm::quote($db, $this->$columnName);
         }
+
+        $sql = 'DELETE FROM ' . $quoteIdentifier(static::getTable()) . ' WHERE ' . implode(' AND ', $where);
 
         return $db->exec($sql) > 0;
     }

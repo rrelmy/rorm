@@ -9,6 +9,6 @@ namespace Rorm;
  * Class RormQueryBuilderException
  * @package Rorm
  */
-class QueryBuilderException extends \Exception
+class QueryBuilderException extends Exception
 {
 }

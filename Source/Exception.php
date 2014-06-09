@@ -6,9 +6,10 @@
 namespace Rorm;
 
 /**
- * Class RormQueryException
+ * Class Exception
  * @package Rorm
  */
-class QueryException extends Exception
+class Exception extends \Exception
 {
+
 }

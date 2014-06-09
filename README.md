@@ -56,3 +56,14 @@ Multiple database connections
 You can set multiple database connections to the Rorm config with the ```setDatabase($db, 'name')``` method.
 
 Each model can have different database connection which can be configure with the ```$_connection``` property.
+
+PostgreSQL caveats!
+-------------------
+The PostgreSQL part is not that good tested as the MySQL/SQLite part!
+
+You MUST ensure to use the correct data type when setting data to a PostgreSQL Model.
+Because the ORM does not check the real table column type, it just uses the data type supplied to is.
+If you are setting an empty string to an boolean column the built query will error because of the wrong type!
+
+I may drop PostgreSQL support because of the complexity it added to Rorm!
+A better merge implementation would help.

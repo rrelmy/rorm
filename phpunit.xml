@@ -13,6 +13,7 @@
             <directory>./Tests/</directory>
             <directory>./TestsMySQL/</directory>
             <directory>./TestsSQLite/</directory>
+            <directory>./TestsPostgreSQL/</directory>
         </testsuite>
     </testsuites>
 

@@ -160,20 +160,25 @@ class ModelBasicTest extends PHPUnit_Framework_TestCase
      * @depends testSetterGetter
      * @depends testSetMultiple
      */
-    public function testGetId()
+    public function testGetAndHasId()
     {
         // normal id
         $a = Test_Basic::create();
+        $this->assertFalse($a->hasId());
         $a->set('id', 768);
+        $this->assertTrue($a->hasId());
         $this->assertEquals(768, $a->getId());
 
         // custom id
         $a = DifferentIdField::create();
+        $this->assertFalse($a->hasId());
         $a->set('custom_id', 98765);
+        $this->assertTrue($a->hasId());
         $this->assertEquals(98765, $a->getId());
 
         // compound keys
         $compoundModel = Test\Compound::create();
+        $this->assertFalse($compoundModel->hasId());
         $compoundModel->setData(
             array(
                 'foo_id' => 1,
@@ -182,6 +187,7 @@ class ModelBasicTest extends PHPUnit_Framework_TestCase
             )
         );
 
+        $this->assertTrue($compoundModel->hasId());
         $this->assertEquals(array('foo_id' => 1, 'bar_id' => 77), $compoundModel->getId());
     }
 }

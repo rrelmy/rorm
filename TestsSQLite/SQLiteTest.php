@@ -11,6 +11,11 @@ use Rorm\Rorm;
  */
 class SQLiteTest extends PHPUnit_Framework_TestCase
 {
+    public function testDbhFlag()
+    {
+        $this->assertTrue(Rorm::getDatabase('sqlite')->isSQLite);
+    }
+
     public function testModels()
     {
         $sqliteDatabase = Rorm::getDatabase('sqlite');
@@ -19,6 +24,15 @@ class SQLiteTest extends PHPUnit_Framework_TestCase
 
         $this->assertEquals($sqliteDatabase, ModelSQLite::getDatabase());
         $this->assertEquals($sqliteDatabase, ModelSQLiteCompound::getDatabase());
+    }
+
+    /**
+     * @depends testModels
+     */
+    public function testQuoteIdentifier()
+    {
+        $quoter = Rorm::getIdentifierQuoter(Rorm::getDatabase('sqlite'));
+        $this->assertEquals('"sqlite"', $quoter('sqlite'));
     }
 
     /**
