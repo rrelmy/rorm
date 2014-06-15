@@ -16,24 +16,16 @@ class Rorm
 {
     const CONNECTION_DEFAULT = 'default';
 
-    /** @var array */
-    protected static $supportedDrivers = array('mysql', 'sqlite', 'pgsql');
-
     /** @var PDO[] */
     protected static $connections;
 
     /**
      * @param PDO $dbh
      * @param string $connection
-     * @throws Exception
      */
     public static function setDatabase(PDO $dbh, $connection = self::CONNECTION_DEFAULT)
     {
         $driverName = $dbh->getAttribute(PDO::ATTR_DRIVER_NAME);
-
-        if (!in_array($driverName, self::$supportedDrivers)) {
-            throw new Exception('database driver «' . $driverName . '» is not supported');
-        }
 
         // FIXME find better way than dynamic fields
         // new RormPDOWrapper($dbh)?
@@ -73,7 +65,7 @@ class Rorm
             case 'double':
                 return (float)$value;
         }
-        
+
         return $db->quote($value);
     }
 

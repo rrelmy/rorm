@@ -19,12 +19,11 @@ Goals
  - Minimalistic ORM
  - Fast and low memory footprint
  - compound key support
- - 100% test code coverage
+ - Almost 100% test code coverage
 
 TODO
 ----
  - Documentation
- - Support other database drivers such as PostgreSQL
 
 Ideas
 -----

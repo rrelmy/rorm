@@ -144,6 +144,11 @@ abstract class Model implements Iterator, JsonSerializable
         $quoteIdentifier = Rorm::getIdentifierQuoter($db);
         $quotedTable = $quoteIdentifier(static::getTable());
 
+        $idColumns = static::$_idColumn;
+        if (!is_array($idColumns)) {
+            $idColumns = array($idColumns);
+        }
+
         // ignore fields
         $notSetFields = static::$_ignoreFields;
 
@@ -156,11 +161,6 @@ abstract class Model implements Iterator, JsonSerializable
              * PostgreSQL, we use the sample syntax from the wiki for a merge
              * @see http://www.postgresql.org/docs/current/static/plpgsql-control-structures.html#PLPGSQL-UPSERT-EXAMPLE
              */
-
-            $idColumns = static::$_idColumn;
-            if (!is_array($idColumns)) {
-                $idColumns = array($idColumns);
-            }
 
             $doMerge = $this->hasId();
 
@@ -229,8 +229,6 @@ abstract class Model implements Iterator, JsonSerializable
 
                 // execute (most likely throws PDOException if there is an error)
                 if ($db->exec($sql) === false) {
-                    echo '***************** FAIL merge ********************';
-
                     return false;
                 }
             } else {
@@ -243,7 +241,6 @@ abstract class Model implements Iterator, JsonSerializable
                 // execute (most likely throws PDOException if there is an error)
                 $stmt = $db->query($sql);
                 if (!$stmt) {
-                    echo '***************** FAIL insert ********************';
                     return false;
                 }
 
@@ -253,9 +250,59 @@ abstract class Model implements Iterator, JsonSerializable
                     $this->set(static::$_idColumn, $stmt->fetchColumn());
                 }
             }
+        } elseif ($db->isMySQL) {
+            /**
+             * MySQL
+             * Instead of REPLACE INTO we use INSERT INTO ON DUPLICATE KEY UPDATE.
+             * Because REPLACE INTO does DELETE and INSERT,
+             * which does not play nice with TRIGGERs and FOREIGN KEY CONSTRAINTS
+             */
+            $sql = 'INSERT INTO ' . $quotedTable . ' ';
 
+            $insertData = array();
+            $updateData = array();
+
+            foreach ($this->_data as $column => $value) {
+                if (in_array($column, $notSetFields)) {
+                    continue;
+                }
+
+                $isIdColumn = in_array($column, $idColumns);
+                $column = $quoteIdentifier($column);
+                $value = Rorm::quote($db, $value);
+
+                $insertData[$column] = $value;
+
+                if (!$isIdColumn) {
+                    $updateData[] = $column . ' = VALUES(' . $column . ')';
+                }
+            }
+
+            // insert
+            $sql .=
+                '(' . implode(', ', array_keys($insertData)) . ')' .
+                ' VALUES ' .
+                '(' . implode(', ', $insertData) . ')';
+
+            // update
+            $sql .= ' ON DUPLICATE KEY UPDATE ' . implode(', ', $updateData);
+
+
+            // execute (most likely throws PDOException if there is an error)
+            if (!$db->exec($sql)) {
+                return false;
+            }
+
+            // update generated id
+            if (static::$_autoId && !$this->hasId()) {
+                // last insert id
+                $this->set(static::$_idColumn, $db->lastInsertId());
+            }
         } else {
-            // tested with MySQL and SQLite
+            /**
+             * SQLite
+             * Is also compatible to MySQL (see notes on MySQL section)
+             */
             $sql = 'REPLACE INTO ' . $quotedTable . ' ';
 
             // (column) VALUES (value)
@@ -276,7 +323,6 @@ abstract class Model implements Iterator, JsonSerializable
 
             // execute (most likely throws PDOException if there is an error)
             if (!$db->exec($sql)) {
-                echo '***************** FAIL sql ********************';
                 return false;
             }
 
