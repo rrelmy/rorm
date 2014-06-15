@@ -259,8 +259,12 @@ abstract class Model implements Iterator, JsonSerializable
              */
             $sql = 'INSERT INTO ' . $quotedTable . ' ';
 
+            $doMerge = $this->hasId();
+
             $insertData = array();
-            $updateData = array();
+            if ($doMerge) {
+                $updateData = array();
+            }
 
             foreach ($this->_data as $column => $value) {
                 if (in_array($column, $notSetFields)) {
@@ -273,7 +277,7 @@ abstract class Model implements Iterator, JsonSerializable
 
                 $insertData[$column] = $value;
 
-                if (!$isIdColumn) {
+                if ($doMerge && !$isIdColumn) {
                     $updateData[] = $column . ' = VALUES(' . $column . ')';
                 }
             }
@@ -284,8 +288,10 @@ abstract class Model implements Iterator, JsonSerializable
                 ' VALUES ' .
                 '(' . implode(', ', $insertData) . ')';
 
-            // update
-            $sql .= ' ON DUPLICATE KEY UPDATE ' . implode(', ', $updateData);
+            if ($doMerge) {
+                // update
+                $sql .= ' ON DUPLICATE KEY UPDATE ' . implode(', ', $updateData);
+            }
 
 
             // execute (most likely throws PDOException if there is an error)
@@ -294,7 +300,7 @@ abstract class Model implements Iterator, JsonSerializable
             }
 
             // update generated id
-            if (static::$_autoId && !$this->hasId()) {
+            if (static::$_autoId && !$doMerge) {
                 // last insert id
                 $this->set(static::$_idColumn, $db->lastInsertId());
             }
