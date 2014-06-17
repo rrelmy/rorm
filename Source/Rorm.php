@@ -57,10 +57,12 @@ class Rorm
         if ($value === true) {
             /**
              * Only PostgreSQL has an boolean type
+             * MySQL has true and false literals
+             * SQLite does not support boolean type nor literals
              */
-            return $db->isPostgreSQL ? 'TRUE' : 1;
+            return !$db->isSQLite ? 'TRUE' : 1;
         } elseif ($value === false) {
-            return $db->isPostgreSQL ? 'FALSE' : 0;
+            return !$db->isSQLite ? 'FALSE' : 0;
         } elseif ($value === null) {
             return 'NULL';
         } elseif (is_int($value)) {

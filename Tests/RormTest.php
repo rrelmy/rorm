@@ -65,21 +65,6 @@ class RormTest extends PHPUnit_Framework_TestCase
         $this->assertEquals($expected, $quoter($value));
     }
 
-    public function testQuote()
-    {
-        $db = Rorm::getDatabase();
-
-        $this->assertEquals(1, Rorm::quote($db, true));
-        $this->assertEquals(0, Rorm::quote($db, false));
-        $this->assertEquals('NULL', Rorm::quote($db, null));
-        $this->assertEquals(17, Rorm::quote($db, 17));
-        $this->assertEquals(28.75, Rorm::quote($db, 28.75));
-        $this->assertInternalType('integer', Rorm::quote($db, 10));
-        $this->assertInternalType('float', Rorm::quote($db, 10.6));
-        $this->assertEquals("'lorem'", Rorm::quote($db, 'lorem'));
-        // todo test object with __toString
-    }
-
     /**
      * @return array
      */
