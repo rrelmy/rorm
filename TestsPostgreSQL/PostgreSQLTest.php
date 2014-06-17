@@ -16,6 +16,14 @@ class PostgreSQLTest extends PHPUnit_Framework_TestCase
         $this->assertTrue(Rorm::getDatabase('pgsql')->isPostgreSQL);
     }
 
+    public function testQuote()
+    {
+        $db = Rorm::getDatabase('pgsql');
+
+        $this->assertEquals('TRUE', Rorm::quote($db, true));
+        $this->assertEquals('FALSE', Rorm::quote($db, false));
+    }
+
     /**
      * @depends testDbhFlag
      */
@@ -76,6 +84,51 @@ class PostgreSQLTest extends PHPUnit_Framework_TestCase
 
         // re load empty
         $this->assertNull(ModelPostgreSQL::find($model->id));
+    }
+
+    /**
+     * @depends testBasic
+     */
+    public function testBasicQueryBuilder()
+    {
+        // create some data
+        $model = ModelPostgreSQL::create();
+        $model->name = 'QueryBuilder';
+        $model->number = 17.75;
+        $model->active = true;
+        $model->deleted = false;
+        $this->assertTrue($model->save());
+
+        // query data
+        $query = ModelPostgreSQL::query();
+        $this->assertInstanceOf('\\Rorm\\QueryBuilder', $query);
+
+        $query
+            ->selectAll()
+            ->select('deleted', 'deleted2')
+            ->selectExpr('number + 10', 'higher_number')
+            ->where('active', true)
+            ->where('deleted', 0) // FIXME does not accept false!
+            ->whereNotNull('name')
+            ->whereRaw('name = ?', array($model->name))
+            ->whereIn('name', array('Lorem', 'ipsum', 'QueryBuilder'))
+            ->whereGt('number', 0)
+            ->whereGte('number', 5)
+            ->whereLt('number', 90)
+            ->whereLte('number', 18)
+            ->whereExpr('number', '10.7 + 7.05')
+            ->orderByAsc('number')
+            ->orderByDesc('id')
+            ->limit(1)
+            ->offset(0);
+
+        $queryModel = $query->findOne();
+        $this->assertInstanceOf('\\RormTest\\ModelPostgreSQL', $queryModel);
+        $this->assertEquals($model->getId(), $queryModel->getId());
+
+        // test boolean parameters
+        $this->assertTrue($queryModel->active);
+        $this->assertFalse($queryModel->deleted);
     }
 
     /**

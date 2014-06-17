@@ -101,9 +101,54 @@ class QueryDatabaseBasicTest extends PHPUnit_Framework_TestCase
     /**
      * @depends testBasic
      */
+    public function testBasicQueryBuilder()
+    {
+        // create some data
+        $model = Test_Basic::create();
+        $model->name = 'QueryBuilder';
+        $model->number = 17.75;
+        $model->active = true;
+        $model->deleted = false;
+        $this->assertTrue($model->save());
+
+        // query data
+        $query = Test_Basic::query();
+        $this->assertInstanceOf('\\Rorm\\QueryBuilder', $query);
+
+        $query
+            ->selectAll()
+            ->select('deleted', 'deleted2')
+            ->selectExpr('number + 10', 'higher_number')
+            ->where('active', true)
+            ->where('deleted', false)
+            ->whereNotNull('name')
+            ->whereRaw('name = ?', array($model->name))
+            ->whereIn('name', array('Lorem', 'ipsum', 'QueryBuilder'))
+            ->whereGt('number', 0)
+            ->whereGte('number', 5)
+            ->whereLt('number', 90)
+            ->whereLte('number', 18)
+            ->whereExpr('number', '10.7 + 7.05')
+            ->orderByAsc('number')
+            ->orderByDesc('id')
+            ->limit(1)
+            ->offset(0);
+
+        $queryModel = $query->findOne();
+        $this->assertInstanceOf('Test_Basic', $queryModel);
+        $this->assertEquals($model->getId(), $queryModel->getId());
+
+        // test boolean parameters
+        $this->assertTrue((bool)$queryModel->active);
+        $this->assertFalse((bool)$queryModel->deleted);
+    }
+
+    /**
+     * @depends testBasic
+     */
     public function testNullIfNotFound()
     {
-        $this->assertNull(Test_Basic::find(765));
+        $this->assertNull(Test_Basic::find('not existing id'));
     }
 
     /**
@@ -178,6 +223,8 @@ class QueryDatabaseBasicTest extends PHPUnit_Framework_TestCase
         $this->assertContainsOnlyInstancesOf('\\RormTest\\Test\\Compound', $result);
         $this->assertEquals(3, count($result));
     }
+
+    // TODO check querybuilder with compound keys
 
     /**
      * @depends testCompound

@@ -133,6 +133,7 @@ abstract class Model implements Iterator, JsonSerializable
     /**
      * @return bool
      * @throws QueryException
+     * @throws \PDOException
      */
     public function save()
     {
@@ -152,13 +153,16 @@ abstract class Model implements Iterator, JsonSerializable
         // ignore fields
         $notSetFields = static::$_ignoreFields;
 
-        // prepare query
-
-        // MySQL and SQLite support REPLACE INTO
-        // In SQLite REPLACE INTO is a alias for INSERT INTO OR REPLACE
+        /**
+         * Different queries are built for each driver
+         *
+         * IDEA: probably split into methods (saveMySQL, savePostgreSQL, saveSQLite)
+         */
         if ($db->isPostgreSQL) {
             /**
-             * PostgreSQL, we use the sample syntax from the wiki for a merge
+             * PostgreSQL
+             *
+             * For a merge use the sample syntax from the wiki for a merge
              * @see http://www.postgresql.org/docs/current/static/plpgsql-control-structures.html#PLPGSQL-UPSERT-EXAMPLE
              */
 
@@ -176,20 +180,20 @@ abstract class Model implements Iterator, JsonSerializable
                     continue;
                 }
 
-                $isIdColumn = in_array($column, $idColumns);
-                $column = $quoteIdentifier($column);
+                $quotedColumn = $quoteIdentifier($column);
                 $value = Rorm::quote($db, $value);
 
-                $quotedData[$column] = $value;
+                $quotedData[$quotedColumn] = $value;
 
                 if ($doMerge) {
-                    if ($isIdColumn) {
-                        $sqlWhere[] = $column . ' = ' . $value;
+                    if (in_array($column, $idColumns)) {
+                        $sqlWhere[] = $quotedColumn . ' = ' . $value;
                     } else {
-                        $sqlColumnsSet[] = $column . ' = ' . $value;
+                        $sqlColumnsSet[] = $quotedColumn . ' = ' . $value;
                     }
                 }
             }
+            unset($column, $value, $quotedColumn);
 
             $sqlColumnsValues =
                 '(' . implode(', ', array_keys($quotedData)) . ')' .
@@ -231,6 +235,8 @@ abstract class Model implements Iterator, JsonSerializable
                 if ($db->exec($sql) === false) {
                     return false;
                 }
+
+                return true;
             } else {
                 // basic insert
                 $sql =
@@ -249,6 +255,8 @@ abstract class Model implements Iterator, JsonSerializable
                     // last insert id
                     $this->set(static::$_idColumn, $stmt->fetchColumn());
                 }
+
+                return true;
             }
         } elseif ($db->isMySQL) {
             /**
@@ -271,16 +279,14 @@ abstract class Model implements Iterator, JsonSerializable
                     continue;
                 }
 
-                $isIdColumn = in_array($column, $idColumns);
-                $column = $quoteIdentifier($column);
-                $value = Rorm::quote($db, $value);
+                $quotedColumn = $quoteIdentifier($column);
+                $insertData[$quotedColumn] = Rorm::quote($db, $value);
 
-                $insertData[$column] = $value;
-
-                if ($doMerge && !$isIdColumn) {
-                    $updateData[] = $column . ' = VALUES(' . $column . ')';
+                if ($doMerge && !in_array($column, $idColumns)) {
+                    $updateData[] = $quotedColumn . ' = VALUES(' . $quotedColumn . ')';
                 }
             }
+            unset($column, $value, $quotedColumn);
 
             // insert
             $sql .=
@@ -293,9 +299,8 @@ abstract class Model implements Iterator, JsonSerializable
                 $sql .= ' ON DUPLICATE KEY UPDATE ' . implode(', ', $updateData);
             }
 
-
             // execute (most likely throws PDOException if there is an error)
-            if (!$db->exec($sql)) {
+            if ($db->exec($sql) === false) {
                 return false;
             }
 
@@ -304,31 +309,29 @@ abstract class Model implements Iterator, JsonSerializable
                 // last insert id
                 $this->set(static::$_idColumn, $db->lastInsertId());
             }
+
+            return true;
         } else {
             /**
              * SQLite
-             * Is also compatible to MySQL (see notes on MySQL section)
              */
-            $sql = 'REPLACE INTO ' . $quotedTable . ' ';
+            $sql = 'INSERT OR REPLACE INTO ' . $quotedTable . ' ';
 
-            // (column) VALUES (value)
+            // build (column) VALUES (values)
             $quotedData = array();
             foreach ($this->_data as $column => $value) {
                 if (in_array($column, $notSetFields)) {
                     continue;
                 }
 
-                /**
-                 * Use PDO::quote on all data types, MySQL and SQLite forgive about everything you can do here
-                 * but probably it would be nicer (and faster?) to check type (see PostgreSQL part)
-                 */
-                $quotedData[$quoteIdentifier($column)] = $db->quote($value);
+                $quotedData[$quoteIdentifier($column)] = Rorm::quote($db, $value);
             }
+            unset($column, $value);
 
             $sql .= '(' . implode(', ', array_keys($quotedData)) . ') VALUES (' . implode(', ', $quotedData) . ')';
 
             // execute (most likely throws PDOException if there is an error)
-            if (!$db->exec($sql)) {
+            if ($db->exec($sql) === false) {
                 return false;
             }
 
@@ -337,9 +340,9 @@ abstract class Model implements Iterator, JsonSerializable
                 // last insert id
                 $this->set(static::$_idColumn, $db->lastInsertId());
             }
-        }
 
-        return true;
+            return true;
+        }
     }
 
     /**
@@ -466,7 +469,7 @@ abstract class Model implements Iterator, JsonSerializable
      * @param stdClass|array|Iterator $object
      * @param array $except
      */
-    public function copyDataFrom($object, $except = array())
+    public function copyDataFrom($object, array $except = array())
     {
         foreach ($object as $key => $value) {
             if (!in_array($key, $except)) {

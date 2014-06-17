@@ -32,7 +32,7 @@ class Query
 
     /**
      * @param string $class
-     * @param PDO $db
+     * @param PDO $db if null the default database connection is used
      */
     public function __construct($class = 'stdClass', PDO $db = null)
     {
@@ -66,9 +66,9 @@ class Query
     }
 
     /**
-     * @param string $params
+     * @param array $params
      */
-    public function setParams($params)
+    public function setParams(array $params)
     {
         $this->params = $params;
     }
@@ -89,6 +89,7 @@ class Query
     protected function execute()
     {
         $this->statement = $this->db->prepare($this->query);
+        // set fetchMode to assoc, it is easier to copy data from an array than an object
         $this->statement->setFetchMode(PDO::FETCH_ASSOC);
         return $this->statement->execute($this->params);
     }
@@ -98,7 +99,7 @@ class Query
      */
     public function fetch()
     {
-        $data = $this->statement->fetch(PDO::FETCH_ASSOC);
+        $data = $this->statement->fetch();
         if ($data !== false) {
             return $this->instanceFromObject($data);
         }
@@ -131,7 +132,7 @@ class Query
      */
     public function findOne()
     {
-        // DO NOT use rowCount to check if something was found because SQLite does not support it
+        // DO NOT use rowCount to check if something was found because not all drivers support it
         if ($this->execute()) {
             return $this->fetch();
         }
@@ -154,13 +155,14 @@ class Query
     {
         $this->execute();
         return new QueryIterator($this->statement, $this);
+        // PHP 5.5 yield version for future use
         /*while ($object = $this->statement->fetchObject()) {
             yield $this->instanceFromObject($object);
         }*/
     }
 
     /**
-     * Return an array with all objects, this could lead to heavy memory consumption
+     * Return an array with all objects, this can lead to heavy memory consumption
      *
      * @return array
      */

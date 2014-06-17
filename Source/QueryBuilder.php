@@ -74,6 +74,15 @@ class QueryBuilder extends Query
 
     // select
     /**
+     * @return $this
+     */
+    public function selectAll()
+    {
+        $this->select[] = '*';
+        return $this;
+    }
+
+    /**
      * @param string $column
      * @param string $as
      * @return $this
@@ -141,6 +150,8 @@ class QueryBuilder extends Query
     }
 
     /**
+     * check: could be extended with optional $params
+     *
      * @param string $column
      * @param string $expression
      * @return $this
@@ -166,6 +177,8 @@ class QueryBuilder extends Query
     }
 
     /**
+     * Take care, the $values gets quoted!
+     *
      * @param string $column
      * @param int|float|string $value
      * @return $this
@@ -178,6 +191,8 @@ class QueryBuilder extends Query
     }
 
     /**
+     * Take care, the $values gets quoted!
+     *
      * @param string $column
      * @param int|float|string $value
      * @return $this
@@ -190,6 +205,8 @@ class QueryBuilder extends Query
     }
 
     /**
+     * Take care, the $values gets quoted!
+     *
      * @param string $column
      * @param int|float|string $value
      * @return $this
@@ -202,6 +219,8 @@ class QueryBuilder extends Query
     }
 
     /**
+     * Take care, the $values gets quoted!
+     *
      * @param string $column
      * @param int|float|string $value
      * @return $this
@@ -236,10 +255,6 @@ class QueryBuilder extends Query
         $this->whereParams = array_merge($this->whereParams, $data);
         return $this;
     }
-
-    // group
-
-    // having
 
     // order by
     /**
@@ -308,10 +323,8 @@ class QueryBuilder extends Query
         if ($this->where) {
             $query .= ' WHERE ' . implode(' AND ', $this->where);
 
-            // params
-            foreach ($this->whereParams as $param) {
-                $params[] = $param;
-            }
+            // params (CAUTION, we override the array, faster and not used before!)
+            $params = $this->whereParams;
         }
 
         // order
@@ -320,11 +333,11 @@ class QueryBuilder extends Query
         }
 
         // limit
-        if ($this->limit) {
+        if ($this->limit !== null) {
             $query .= ' LIMIT ' . (int)$this->limit;
 
             // offset
-            if ($this->offset) {
+            if ($this->offset !== null) {
                 $query .= ' OFFSET ' . (int)$this->offset;
             }
         }

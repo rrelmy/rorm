@@ -1,6 +1,5 @@
 <?php
 /**
- *
  * @author Rémy M. Böhler <code@rrelmy.ch>
  */
 
@@ -28,8 +27,8 @@ class QueryIterator extends \IteratorIterator
      */
     public function __construct(PDOStatement $iterator, $caller)
     {
-        $this->caller = $caller;
         parent::__construct($iterator);
+        $this->caller = $caller;
     }
 
     public function rewind()
@@ -47,7 +46,7 @@ class QueryIterator extends \IteratorIterator
     }
 
     /**
-     * Transform plain object to the desired model
+     * Transform plain object returned by PDOStatement to the desired model
      *
      * @return mixed
      */

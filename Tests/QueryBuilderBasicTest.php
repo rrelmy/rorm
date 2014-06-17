@@ -16,6 +16,7 @@ class QueryBuilderBasicTest extends PHPUnit_Framework_TestCase
     {
         $query = QueryModel::query();
         $query
+            ->selectAll()
             ->select('name')
             ->select('name', 'othername')
             ->selectExpr('YEAR(NOW())')
@@ -95,16 +96,23 @@ class QueryBuilderBasicTest extends PHPUnit_Framework_TestCase
         $query->select('id');
         $this->assertEquals('SELECT `id` FROM `test`', $query->build()->getQuery());
 
+        // query basic all
+        $query = QueryModel::query()
+            ->selectAll()
+            ->select('id');
+        $this->assertEquals('SELECT *, `id` FROM `test`', $query->build()->getQuery());
+
+
         // query extended
-        $query = QueryModel::query();
-        $query->select('id');
-        $query->select('deleted', 'delete');
+        $query = QueryModel::query()
+            ->select('id')
+            ->select('deleted', 'delete');
         $this->assertEquals('SELECT `id`, `deleted` AS `delete` FROM `test`', $query->build()->getQuery());
 
         // expressions
-        $queryExpr = QueryModel::query();
-        $queryExpr->selectExpr('NOW()', 'today');
-        $queryExpr->selectExpr('YEAR(NOW())');
+        $queryExpr = QueryModel::query()
+            ->selectExpr('NOW()', 'today')
+            ->selectExpr('YEAR(NOW())');
         $this->assertEquals('SELECT NOW() AS `today`, YEAR(NOW()) FROM `test`', $queryExpr->build()->getQuery());
     }
 

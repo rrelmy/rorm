@@ -1,6 +1,5 @@
 <?php
 /**
- *
  * @author Rémy M. Böhler <code@rrelmy.ch>
  */
 
@@ -30,10 +29,10 @@ class Rorm
         // FIXME find better way than dynamic fields
         // new RormPDOWrapper($dbh)?
         $dbh->isMySQL = $driverName == 'mysql';
-        $dbh->isSQLite = !$dbh->isMySQL && $driverName == 'sqlite';
-        $dbh->isPostgreSQL = !$dbh->isMySQL && !$dbh->isSQLite && $driverName == 'pgsql';
+        $dbh->isSQLite = $driverName == 'sqlite';
+        $dbh->isPostgreSQL = $driverName == 'pgsql';
 
-        self::$connections[$connection] = $dbh;
+        static::$connections[$connection] = $dbh;
     }
 
     /**
@@ -42,8 +41,8 @@ class Rorm
      */
     public static function getDatabase($connection = self::CONNECTION_DEFAULT)
     {
-        if (array_key_exists($connection, self::$connections)) {
-            return self::$connections[$connection];
+        if (array_key_exists($connection, static::$connections)) {
+            return static::$connections[$connection];
         }
         return null;
     }
@@ -55,32 +54,35 @@ class Rorm
      */
     public static function quote(PDO $db, $value)
     {
-        switch (gettype($value)) {
-            case 'boolean':
-                return $value ? 'TRUE' : 'FALSE';
-            case 'NULL':
-                return 'NULL';
-            case 'integer':
-                return (int)$value;
-            case 'double':
-                return (float)$value;
+        if ($value === true) {
+            /**
+             * Only PostgreSQL has an boolean type
+             */
+            return $db->isPostgreSQL ? 'TRUE' : 1;
+        } elseif ($value === false) {
+            return $db->isPostgreSQL ? 'FALSE' : 0;
+        } elseif ($value === null) {
+            return 'NULL';
+        } elseif (is_int($value)) {
+            return (int)$value;
+        } elseif (is_float($value)) {
+            return (float)$value;
         }
-
         return $db->quote($value);
     }
 
     /**
-     * Method to quote identifier
-     * Please make sure you keep the quoter as long you are needing it for performance reasons.
+     * Method to quote identifiers
+     * Please make sure you keep the quoter as long you are needing it.
      *
      * @param \PDO $dbh
      * @return callable
      */
     public static function getIdentifierQuoter(\PDO $dbh = null)
     {
-        $dbh = $dbh ? $dbh : self::getDatabase();
+        $dbh = $dbh ? $dbh : static::getDatabase();
 
-        if ($dbh->getAttribute(PDO::ATTR_DRIVER_NAME) == 'mysql') {
+        if ($dbh->isMySQL) {
             // mysql mode
             return function ($identifier) {
                 return '`' . str_replace('`', '``', $identifier) . '`';
