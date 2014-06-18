@@ -24,11 +24,12 @@ Goals
 TODO
 ----
  - check if public properties/methods are clear named
- - count() method
+ - fetchColumn
  - setData/getData -> addData or just leave copyDataFrom?
  - check for possible model loaded hook
  - check if autoId could be ditched
  - consider `setExpr` (may be bad because until the model is loaded again the data is 'weird')
+ - grouping/having
  - Documentation
 
 Ideas

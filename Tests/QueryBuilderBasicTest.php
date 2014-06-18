@@ -16,6 +16,7 @@ class QueryBuilderBasicTest extends PHPUnit_Framework_TestCase
     {
         $query = QueryModel::query();
         $query
+            ->distinct()
             ->selectAll()
             ->select('name')
             ->select('name', 'othername')
@@ -95,6 +96,13 @@ class QueryBuilderBasicTest extends PHPUnit_Framework_TestCase
         $query = QueryModel::query();
         $query->select('id');
         $this->assertEquals('SELECT `id` FROM `test`', $query->build()->getQuery());
+
+        // query basic distinct
+        $query = QueryModel::query();
+        $query
+            ->distinct()
+            ->select('id');
+        $this->assertEquals('SELECT DISTINCT `id` FROM `test`', $query->build()->getQuery());
 
         // query basic all
         $query = QueryModel::query()

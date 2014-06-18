@@ -20,23 +20,25 @@ class QueryBuilder extends Query
     protected $idColumn;
 
     // query
-    /** @var array */
-    public $select = array();
+    protected $distinct = false;
 
     /** @var array */
-    public $where = array();
+    protected $select = array();
 
     /** @var array */
-    public $whereParams = array();
+    protected $where = array();
 
     /** @var array */
-    public $order = array();
+    protected $whereParams = array();
+
+    /** @var array */
+    protected $order = array();
 
     /** @var int */
-    public $limit;
+    protected $limit;
 
     /** @var int */
-    public $offset;
+    protected $offset;
 
     /**
      * @param string $table
@@ -73,6 +75,12 @@ class QueryBuilder extends Query
     }
 
     // select
+    public function distinct()
+    {
+        $this->distinct = true;
+        return $this;
+    }
+
     /**
      * @return $this
      */
@@ -306,14 +314,18 @@ class QueryBuilder extends Query
     public function build()
     {
         $params = array();
-        $query = 'SELECT';
+        $query = 'SELECT ';
+
+        if ($this->distinct) {
+            $query .= 'DISTINCT ';
+        }
 
         // select
         if ($this->select) {
-            $query .= ' ' . implode(', ', $this->select);
+            $query .= implode(', ', $this->select);
         } else {
             // select everything
-            $query .= ' *';
+            $query .= '*';
         }
 
         // from
