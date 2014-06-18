@@ -126,6 +126,17 @@ class Query
     }
 
     /**
+     * @return mixed
+     */
+    public function findColumn()
+    {
+        if ($this->execute()) {
+            return $this->statement->fetchColumn();
+        }
+        return null;
+    }
+
+    /**
      * Return one object
      *
      * @return mixed

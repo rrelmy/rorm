@@ -363,6 +363,15 @@ class QueryBuilder extends Query
     /**
      * @return mixed
      */
+    public function findColumn()
+    {
+        $this->build();
+        return parent::findColumn();
+    }
+
+    /**
+     * @return mixed
+     */
     public function findOne()
     {
         $this->build();

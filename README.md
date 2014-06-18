@@ -23,8 +23,6 @@ Goals
 
 TODO
 ----
- - check if public properties/methods are clear named
- - fetchColumn
  - setData/getData -> addData or just leave copyDataFrom?
  - check for possible model loaded hook
  - check if autoId could be ditched

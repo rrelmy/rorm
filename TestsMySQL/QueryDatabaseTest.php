@@ -110,6 +110,23 @@ class QueryDatabaseBasicTest extends PHPUnit_Framework_TestCase
     /**
      * @depends testBasic
      */
+    public function testColumn()
+    {
+        // create some data
+        $model = Test_Basic::create();
+        $model->name = 'QueryBuilder';
+        $model->number = 17.75;
+        $model->active = true;
+        $model->deleted = false;
+        $this->assertTrue($model->save());
+
+        $result = Test_Basic::query()->select('name')->whereId($model->id)->findColumn();
+        $this->assertEquals('QueryBuilder', $result);
+    }
+
+    /**
+     * @depends testBasic
+     */
     public function testBasicQueryBuilder()
     {
         // create some data
