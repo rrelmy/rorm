@@ -59,6 +59,11 @@ class QueryDatabaseBasicTest extends PHPUnit_Framework_TestCase
      */
     public function testBasic()
     {
+        // find empty
+        $this->assertFalse(!!Test_Basic::query()->findColumn());
+        $this->assertFalse(!!Test_Basic::query()->findOne());
+
+        // create entry
         $model = Test_Basic::create();
         $this->assertInstanceOf('Test_Basic', $model);
 
