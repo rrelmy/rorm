@@ -15,5 +15,5 @@ use Rorm\Model;
 class Test_Basic extends Model
 {
     /** @var array */
-    public static $_ignoreFields = array('modified');
+    public static $_ignoreColumns = array('modified');
 }

@@ -25,7 +25,7 @@ abstract class Model implements Iterator, JsonSerializable
     public static $_autoId = true;
 
     /** @var array */
-    public static $_ignoreFields = array();
+    public static $_ignoreColumns = array();
 
     /** @var string */
     public static $_connection = Rorm::CONNECTION_DEFAULT;
@@ -151,7 +151,7 @@ abstract class Model implements Iterator, JsonSerializable
         }
 
         // ignore fields
-        $notSetFields = static::$_ignoreFields;
+        $notSetFields = static::$_ignoreColumns;
 
         /**
          * Different queries are built for each driver
