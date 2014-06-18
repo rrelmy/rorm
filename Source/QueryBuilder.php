@@ -395,4 +395,20 @@ class QueryBuilder extends Query
         $this->build();
         return parent::findAll();
     }
+
+    /**
+     * Count found rows
+     * this method executes a COUNT(*) query
+     *
+     * @return int
+     */
+    public function count()
+    {
+        $select = $this->select;
+        $this->select = array('COUNT(*)');
+        $count = $this->findColumn();
+        $this->select = $select;
+
+        return $count;
+    }
 }

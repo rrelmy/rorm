@@ -270,4 +270,45 @@ class QueryDatabaseBasicTest extends PHPUnit_Framework_TestCase
             $this->assertInstanceOf('\\RormTest\\Test\\Compound', $model);
         }
     }
+
+    public function testCount()
+    {
+        $db = Test_Basic::getDatabase();
+
+        // clear table
+        $db->exec('TRUNCATE TABLE test_basic;');
+
+        // insert data
+        $insert = $db->prepare('INSERT INTO test_basic (name, number, active, deleted) VALUES(?, ?, ?, ?)');
+
+        $insert->execute(array('Lorem', 10, true, false));
+        $insert->execute(array('ipsum', 17, true, false));
+        $insert->execute(array('dolor', 12.5, true, false));
+        $insert->execute(array('sit amet', -10, true, false));
+        $insert->execute(array('Deleted', 0, false, true));
+        $insert->execute(array('Inactive', 0, false, false));
+
+        // count with query builder
+        $query = Test_Basic::query()->where('active', true)->where('deleted', false)->orderByAsc('number');
+        $this->assertEquals(4, $query->count());
+
+        // check result after count
+        $model = $query->findOne();
+        $this->assertInstanceOf('Test_Basic', $model);
+        $this->assertEquals(-10, $model->number);
+
+        // count with customQuery (inefficient!)
+        $customQuery = Test_Basic::customQuery(
+            'SELECT *
+            FROM test_basic
+            WHERE active = TRUE AND deleted = FALSE
+            ORDER BY number ASC'
+        );
+        $this->assertEquals(4, $customQuery->count());
+
+        // check result after count
+        $model = $customQuery->findOne();
+        $this->assertInstanceOf('Test_Basic', $model);
+        $this->assertEquals(-10, $model->number);
+    }
 }

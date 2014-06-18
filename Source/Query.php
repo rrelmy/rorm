@@ -187,4 +187,16 @@ class Query
 
         return $result;
     }
+
+    /**
+     * This operation is very expensive.
+     *
+     * PDOStatement::rowCount does not work on all drivers!
+     *
+     * @return int
+     */
+    public function count()
+    {
+        return count($this->findAll());
+    }
 }
