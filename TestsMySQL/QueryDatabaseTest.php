@@ -295,6 +295,7 @@ class QueryDatabaseBasicTest extends PHPUnit_Framework_TestCase
 
         // count with query builder
         $query = Test_Basic::query()->where('active', true)->where('deleted', false)->orderByAsc('number');
+        $this->assertInternalType('integer', $query->count());
         $this->assertEquals(4, $query->count());
 
         // check result after count

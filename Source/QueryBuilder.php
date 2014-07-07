@@ -409,6 +409,6 @@ class QueryBuilder extends Query
         $count = $this->findColumn();
         $this->select = $select;
 
-        return $count;
+        return $count === null ? null : (int) $count;
     }
 }
