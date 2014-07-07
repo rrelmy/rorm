@@ -5,10 +5,8 @@
 
 namespace Rorm;
 
-use stdClass;
 use Iterator;
 use JsonSerializable;
-use PDO;
 
 /**
  * Class Model
@@ -466,7 +464,7 @@ abstract class Model implements Iterator, JsonSerializable
     }
 
     /**
-     * @param stdClass|array|Iterator $object
+     * @param \stdClass|array|Iterator $object
      * @param array $except
      */
     public function copyDataFrom($object, array $except = array())

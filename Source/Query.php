@@ -5,7 +5,6 @@
 namespace Rorm;
 
 use PDO;
-use PDOStatement;
 
 /**
  * Class Query
@@ -27,7 +26,7 @@ class Query
     /** @var array */
     protected $params;
 
-    /** @var PDOStatement */
+    /** @var \PDOStatement */
     protected $statement;
 
     /**

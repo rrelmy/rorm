@@ -4,6 +4,8 @@
  */
 namespace Rorm;
 
+use PDO;
+
 /**
  * Class QueryBuilder
  * @package Rorm
@@ -46,7 +48,7 @@ class QueryBuilder extends Query
      * @param string $class
      * @param \PDO $dbh
      */
-    public function __construct($table, $idColumn, $class = 'stdClass', \PDO $dbh = null)
+    public function __construct($table, $idColumn, $class = 'stdClass', PDO $dbh = null)
     {
         parent::__construct($class, $dbh);
 
@@ -409,6 +411,6 @@ class QueryBuilder extends Query
         $count = $this->findColumn();
         $this->select = $select;
 
-        return $count === null ? null : (int) $count;
+        return $count === null ? null : (int)$count;
     }
 }

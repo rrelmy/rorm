@@ -99,7 +99,7 @@ class Rorm
      * @param \PDO $dbh
      * @return callable
      */
-    public static function getIdentifierQuoter(\PDO $dbh = null)
+    public static function getIdentifierQuoter(PDO $dbh = null)
     {
         $dbh = $dbh ? $dbh : static::getDatabase();
 
