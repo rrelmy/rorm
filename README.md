@@ -57,7 +57,7 @@ No special method are supplied for configure unbuffered queries. You may use the
 Multiple database connections
 -----------------------------
 
-You can set multiple database connections to the Rorm config with the ```setDatabase($db, 'name')``` method.
+You can set multiple database connections to the Rorm config with the ```setDatabase($dbh, 'name')``` method.
 
 Each model can have different database connection which can be configure with the ```$_connection``` property.
 

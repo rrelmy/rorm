@@ -67,11 +67,11 @@ class Rorm
     }
 
     /**
-     * @param PDO $db
+     * @param PDO $dbh
      * @param mixed $value
      * @return mixed
      */
-    public static function quote(PDO $db, $value)
+    public static function quote(PDO $dbh, $value)
     {
         if ($value === true) {
             /**
@@ -79,9 +79,9 @@ class Rorm
              * MySQL has true and false literals
              * SQLite does not support boolean type nor literals
              */
-            return static::isMySQL($db) || static::isPostreSQL($db) ? 'TRUE' : 1;
+            return static::isMySQL($dbh) || static::isPostreSQL($dbh) ? 'TRUE' : 1;
         } elseif ($value === false) {
-            return static::isMySQL($db) || static::isPostreSQL($db) ? 'FALSE' : 0;
+            return static::isMySQL($dbh) || static::isPostreSQL($dbh) ? 'FALSE' : 0;
         } elseif ($value === null) {
             return 'NULL';
         } elseif (is_int($value)) {
@@ -89,7 +89,7 @@ class Rorm
         } elseif (is_float($value)) {
             return (float)$value;
         }
-        return $db->quote($value);
+        return $dbh->quote($value);
     }
 
     /**

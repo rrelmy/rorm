@@ -21,20 +21,20 @@ class SQLiteTest extends PHPUnit_Framework_TestCase
 
     public function testQuote()
     {
-        $db = Rorm::getDatabase('sqlite');
+        $dbh = Rorm::getDatabase('sqlite');
 
-        $this->assertEquals(1, Rorm::quote($db, true));
-        $this->assertEquals(0, Rorm::quote($db, false));
+        $this->assertEquals(1, Rorm::quote($dbh, true));
+        $this->assertEquals(0, Rorm::quote($dbh, false));
     }
 
     public function testModels()
     {
-        $sqliteDatabase = Rorm::getDatabase('sqlite');
-        $this->assertInstanceOf('PDO', $sqliteDatabase);
-        $this->assertEquals($sqliteDatabase->getAttribute(PDO::ATTR_DRIVER_NAME), 'sqlite');
+        $dbh = Rorm::getDatabase('sqlite');
+        $this->assertInstanceOf('PDO', $dbh);
+        $this->assertEquals($dbh->getAttribute(PDO::ATTR_DRIVER_NAME), 'sqlite');
 
-        $this->assertEquals($sqliteDatabase, ModelSQLite::getDatabase());
-        $this->assertEquals($sqliteDatabase, ModelSQLiteCompound::getDatabase());
+        $this->assertEquals($dbh, ModelSQLite::getDatabase());
+        $this->assertEquals($dbh, ModelSQLiteCompound::getDatabase());
     }
 
     /**

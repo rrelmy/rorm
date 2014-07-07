@@ -44,15 +44,15 @@ class QueryBuilder extends Query
      * @param string $table
      * @param string|array $idColumn
      * @param string $class
-     * @param \PDO $db
+     * @param \PDO $dbh
      */
-    public function __construct($table, $idColumn, $class = 'stdClass', \PDO $db = null)
+    public function __construct($table, $idColumn, $class = 'stdClass', \PDO $dbh = null)
     {
-        parent::__construct($class, $db);
+        parent::__construct($class, $dbh);
 
         $this->table = $table;
         $this->idColumn = is_array($idColumn) ? $idColumn : array($idColumn);
-        $this->quoteIdentifier = Rorm::getIdentifierQuoter($this->db);
+        $this->quoteIdentifier = Rorm::getIdentifierQuoter($this->dbh);
     }
 
     /**

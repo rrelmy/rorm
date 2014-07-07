@@ -13,7 +13,7 @@ use PDOStatement;
 class Query
 {
     /** @var PDO */
-    protected $db;
+    protected $dbh;
 
     /** @var string */
     protected $class;
@@ -32,13 +32,13 @@ class Query
 
     /**
      * @param string $class
-     * @param PDO $db if null the default database connection is used
+     * @param PDO $dbh if null the default database connection is used
      */
-    public function __construct($class = 'stdClass', PDO $db = null)
+    public function __construct($class = 'stdClass', PDO $dbh = null)
     {
         $this->class = $class;
         $this->classIsOrmModel = is_subclass_of($this->class, '\\Rorm\\Model');
-        $this->db = $db ? $db : Rorm::getDatabase();
+        $this->dbh = $dbh ? $dbh : Rorm::getDatabase();
     }
 
     /**
@@ -88,7 +88,7 @@ class Query
      */
     protected function execute()
     {
-        $this->statement = $this->db->prepare($this->query);
+        $this->statement = $this->dbh->prepare($this->query);
         // set fetchMode to assoc, it is easier to copy data from an array than an object
         $this->statement->setFetchMode(PDO::FETCH_ASSOC);
         return $this->statement->execute($this->params);

@@ -27,16 +27,16 @@ class QueryDatabaseBasicTest extends PHPUnit_Framework_TestCase
      */
     public function testQuote()
     {
-        $db = Rorm::getDatabase();
+        $dbh = Rorm::getDatabase();
 
-        $this->assertEquals('TRUE', Rorm::quote($db, true));
-        $this->assertEquals('FALSE', Rorm::quote($db, false));
-        $this->assertEquals('NULL', Rorm::quote($db, null));
-        $this->assertEquals(17, Rorm::quote($db, 17));
-        $this->assertEquals(28.75, Rorm::quote($db, 28.75));
-        $this->assertInternalType('integer', Rorm::quote($db, 10));
-        $this->assertInternalType('float', Rorm::quote($db, 10.6));
-        $this->assertEquals("'lorem'", Rorm::quote($db, 'lorem'));
+        $this->assertEquals('TRUE', Rorm::quote($dbh, true));
+        $this->assertEquals('FALSE', Rorm::quote($dbh, false));
+        $this->assertEquals('NULL', Rorm::quote($dbh, null));
+        $this->assertEquals(17, Rorm::quote($dbh, 17));
+        $this->assertEquals(28.75, Rorm::quote($dbh, 28.75));
+        $this->assertInternalType('integer', Rorm::quote($dbh, 10));
+        $this->assertInternalType('float', Rorm::quote($dbh, 10.6));
+        $this->assertEquals("'lorem'", Rorm::quote($dbh, 'lorem'));
         // todo test object with __toString
     }
 
@@ -281,13 +281,13 @@ class QueryDatabaseBasicTest extends PHPUnit_Framework_TestCase
 
     public function testCount()
     {
-        $db = Test_Basic::getDatabase();
+        $dbh = Test_Basic::getDatabase();
 
         // clear table
-        $db->exec('TRUNCATE TABLE test_basic;');
+        $dbh->exec('TRUNCATE TABLE test_basic;');
 
         // insert data
-        $insert = $db->prepare('INSERT INTO test_basic (name, number, active, deleted) VALUES(?, ?, ?, ?)');
+        $insert = $dbh->prepare('INSERT INTO test_basic (name, number, active, deleted) VALUES(?, ?, ?, ?)');
 
         $insert->execute(array('Lorem', 10, true, false));
         $insert->execute(array('ipsum', 17, true, false));

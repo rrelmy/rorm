@@ -141,8 +141,8 @@ abstract class Model implements Iterator, JsonSerializable
             throw new QueryException('can not save empty data!');
         }
 
-        $db = static::getDatabase();
-        $quoteIdentifier = Rorm::getIdentifierQuoter($db);
+        $dbh = static::getDatabase();
+        $quoteIdentifier = Rorm::getIdentifierQuoter($dbh);
         $quotedTable = $quoteIdentifier(static::getTable());
 
         $idColumns = static::$_idColumn;
@@ -158,7 +158,7 @@ abstract class Model implements Iterator, JsonSerializable
          *
          * IDEA: probably split into methods (saveMySQL, savePostgreSQL, saveSQLite)
          */
-        if (Rorm::isPostreSQL($db)) {
+        if (Rorm::isPostreSQL($dbh)) {
             /**
              * PostgreSQL
              *
@@ -181,7 +181,7 @@ abstract class Model implements Iterator, JsonSerializable
                 }
 
                 $quotedColumn = $quoteIdentifier($column);
-                $value = Rorm::quote($db, $value);
+                $value = Rorm::quote($dbh, $value);
 
                 $quotedData[$quotedColumn] = $value;
 
@@ -232,7 +232,7 @@ abstract class Model implements Iterator, JsonSerializable
                 SELECT rorm_merge();';
 
                 // execute (most likely throws PDOException if there is an error)
-                if ($db->exec($sql) === false) {
+                if ($dbh->exec($sql) === false) {
                     return false;
                 }
 
@@ -245,7 +245,7 @@ abstract class Model implements Iterator, JsonSerializable
                     ' RETURNING ' . $quoteIdentifier(static::$_idColumn);
 
                 // execute (most likely throws PDOException if there is an error)
-                $stmt = $db->query($sql);
+                $stmt = $dbh->query($sql);
                 if (!$stmt) {
                     return false;
                 }
@@ -258,7 +258,7 @@ abstract class Model implements Iterator, JsonSerializable
 
                 return true;
             }
-        } elseif (Rorm::isMySQL($db)) {
+        } elseif (Rorm::isMySQL($dbh)) {
             /**
              * MySQL
              * Instead of REPLACE INTO we use INSERT INTO ON DUPLICATE KEY UPDATE.
@@ -280,7 +280,7 @@ abstract class Model implements Iterator, JsonSerializable
                 }
 
                 $quotedColumn = $quoteIdentifier($column);
-                $insertData[$quotedColumn] = Rorm::quote($db, $value);
+                $insertData[$quotedColumn] = Rorm::quote($dbh, $value);
 
                 if ($doMerge && !in_array($column, $idColumns)) {
                     $updateData[] = $quotedColumn . ' = VALUES(' . $quotedColumn . ')';
@@ -300,14 +300,14 @@ abstract class Model implements Iterator, JsonSerializable
             }
 
             // execute (most likely throws PDOException if there is an error)
-            if ($db->exec($sql) === false) {
+            if ($dbh->exec($sql) === false) {
                 return false;
             }
 
             // update generated id
             if (static::$_autoId && !$doMerge) {
                 // last insert id
-                $this->set(static::$_idColumn, $db->lastInsertId());
+                $this->set(static::$_idColumn, $dbh->lastInsertId());
             }
 
             return true;
@@ -324,21 +324,21 @@ abstract class Model implements Iterator, JsonSerializable
                     continue;
                 }
 
-                $quotedData[$quoteIdentifier($column)] = Rorm::quote($db, $value);
+                $quotedData[$quoteIdentifier($column)] = Rorm::quote($dbh, $value);
             }
             unset($column, $value);
 
             $sql .= '(' . implode(', ', array_keys($quotedData)) . ') VALUES (' . implode(', ', $quotedData) . ')';
 
             // execute (most likely throws PDOException if there is an error)
-            if ($db->exec($sql) === false) {
+            if ($dbh->exec($sql) === false) {
                 return false;
             }
 
             // update generated id
             if (static::$_autoId && !$this->hasId()) {
                 // last insert id
-                $this->set(static::$_idColumn, $db->lastInsertId());
+                $this->set(static::$_idColumn, $dbh->lastInsertId());
             }
 
             return true;
@@ -350,8 +350,8 @@ abstract class Model implements Iterator, JsonSerializable
      */
     public function delete()
     {
-        $db = static::getDatabase();
-        $quoteIdentifier = Rorm::getIdentifierQuoter($db);
+        $dbh = static::getDatabase();
+        $quoteIdentifier = Rorm::getIdentifierQuoter($dbh);
 
         $idColumns = static::$_idColumn;
         if (!is_array($idColumns)) {
@@ -360,12 +360,12 @@ abstract class Model implements Iterator, JsonSerializable
 
         $where = array();
         foreach ($idColumns as $columnName) {
-            $where[] = $quoteIdentifier($columnName) . ' = ' . Rorm::quote($db, $this->$columnName);
+            $where[] = $quoteIdentifier($columnName) . ' = ' . Rorm::quote($dbh, $this->$columnName);
         }
 
         $sql = 'DELETE FROM ' . $quoteIdentifier(static::getTable()) . ' WHERE ' . implode(' AND ', $where);
 
-        return $db->exec($sql) > 0;
+        return $dbh->exec($sql) > 0;
     }
 
     // data access

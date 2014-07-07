@@ -33,9 +33,9 @@ class RormTest extends PHPUnit_Framework_TestCase
      */
     public function testSetDatabase()
     {
-        $db = Rorm::getDatabase();
-        Rorm::setDatabase($db);
-        $this->assertEquals($db, Rorm::getDatabase());
+        $dbh = Rorm::getDatabase();
+        Rorm::setDatabase($dbh);
+        $this->assertEquals($dbh, Rorm::getDatabase());
     }
 
     /**

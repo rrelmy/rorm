@@ -21,10 +21,10 @@ class PostgreSQLTest extends PHPUnit_Framework_TestCase
 
     public function testQuote()
     {
-        $db = Rorm::getDatabase('pgsql');
+        $dbh = Rorm::getDatabase('pgsql');
 
-        $this->assertEquals('TRUE', Rorm::quote($db, true));
-        $this->assertEquals('FALSE', Rorm::quote($db, false));
+        $this->assertEquals('TRUE', Rorm::quote($dbh, true));
+        $this->assertEquals('FALSE', Rorm::quote($dbh, false));
     }
 
     /**
@@ -32,12 +32,12 @@ class PostgreSQLTest extends PHPUnit_Framework_TestCase
      */
     public function testModels()
     {
-        $pgsqlDatabase = Rorm::getDatabase('pgsql');
-        $this->assertInstanceOf('PDO', $pgsqlDatabase);
-        $this->assertEquals($pgsqlDatabase->getAttribute(PDO::ATTR_DRIVER_NAME), 'pgsql');
+        $dbh = Rorm::getDatabase('pgsql');
+        $this->assertInstanceOf('PDO', $dbh);
+        $this->assertEquals($dbh->getAttribute(PDO::ATTR_DRIVER_NAME), 'pgsql');
 
-        $this->assertEquals($pgsqlDatabase, ModelPostgreSQL::getDatabase());
-        $this->assertEquals($pgsqlDatabase, ModelPostgreSQLCompound::getDatabase());
+        $this->assertEquals($dbh, ModelPostgreSQL::getDatabase());
+        $this->assertEquals($dbh, ModelPostgreSQLCompound::getDatabase());
     }
 
     /**
