@@ -14,13 +14,16 @@ use Test_Basic;
  */
 class QueryDatabaseBasicTest extends PHPUnit_Framework_TestCase
 {
-    public function testDbhFlag()
+    public function testDbDriver()
     {
-        $this->assertTrue(Rorm::getDatabase()->isMySQL);
+        $dbh = Rorm::getDatabase();
+        $this->assertTrue(Rorm::isMySQL($dbh));
+        $this->assertFalse(Rorm::isSQLite($dbh));
+        $this->assertFalse(Rorm::isPostreSQL($dbh));
     }
 
     /**
-     * @depends testDbhFlag
+     * @depends testDbDriver
      */
     public function testQuote()
     {

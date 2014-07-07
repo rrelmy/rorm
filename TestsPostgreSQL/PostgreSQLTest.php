@@ -11,9 +11,12 @@ use Rorm\Rorm;
  */
 class PostgreSQLTest extends PHPUnit_Framework_TestCase
 {
-    public function testDbhFlag()
+    public function testDbDriver()
     {
-        $this->assertTrue(Rorm::getDatabase('pgsql')->isPostgreSQL);
+        $dbh = Rorm::getDatabase('pgsql');
+        $this->assertTrue(Rorm::isPostreSQL($dbh));
+        $this->assertFalse(Rorm::isMySQL($dbh));
+        $this->assertFalse(Rorm::isSQLite($dbh));
     }
 
     public function testQuote()
@@ -25,7 +28,7 @@ class PostgreSQLTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @depends testDbhFlag
+     * @depends testDbDriver
      */
     public function testModels()
     {
@@ -38,7 +41,7 @@ class PostgreSQLTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @depends testDbhFlag
+     * @depends testDbDriver
      */
     public function testQuoteIdentifier()
     {

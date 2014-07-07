@@ -24,14 +24,6 @@ class Rorm
      */
     public static function setDatabase(PDO $dbh, $connection = self::CONNECTION_DEFAULT)
     {
-        $driverName = $dbh->getAttribute(PDO::ATTR_DRIVER_NAME);
-
-        // FIXME find better way than dynamic fields
-        // new RormPDOWrapper($dbh)?
-        $dbh->isMySQL = $driverName == 'mysql';
-        $dbh->isSQLite = $driverName == 'sqlite';
-        $dbh->isPostgreSQL = $driverName == 'pgsql';
-
         static::$connections[$connection] = $dbh;
     }
 
@@ -48,6 +40,33 @@ class Rorm
     }
 
     /**
+     * @param PDO $dbh
+     * @return bool
+     */
+    public static function isMySQL(PDO $dbh)
+    {
+        return $dbh->getAttribute(PDO::ATTR_DRIVER_NAME) == 'mysql';
+    }
+
+    /**
+     * @param PDO $dbh
+     * @return bool
+     */
+    public static function isSQLite(PDO $dbh)
+    {
+        return $dbh->getAttribute(PDO::ATTR_DRIVER_NAME) == 'sqlite';
+    }
+
+    /**
+     * @param PDO $dbh
+     * @return bool
+     */
+    public static function isPostreSQL(PDO $dbh)
+    {
+        return $dbh->getAttribute(PDO::ATTR_DRIVER_NAME) == 'pgsql';
+    }
+
+    /**
      * @param PDO $db
      * @param mixed $value
      * @return mixed
@@ -60,9 +79,9 @@ class Rorm
              * MySQL has true and false literals
              * SQLite does not support boolean type nor literals
              */
-            return !$db->isSQLite ? 'TRUE' : 1;
+            return static::isMySQL($db) || static::isPostreSQL($db) ? 'TRUE' : 1;
         } elseif ($value === false) {
-            return !$db->isSQLite ? 'FALSE' : 0;
+            return static::isMySQL($db) || static::isPostreSQL($db) ? 'FALSE' : 0;
         } elseif ($value === null) {
             return 'NULL';
         } elseif (is_int($value)) {
@@ -84,7 +103,7 @@ class Rorm
     {
         $dbh = $dbh ? $dbh : static::getDatabase();
 
-        if ($dbh->isMySQL) {
+        if (static::isMySQL($dbh)) {
             // mysql mode
             return function ($identifier) {
                 return '`' . str_replace('`', '``', $identifier) . '`';

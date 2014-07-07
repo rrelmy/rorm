@@ -11,9 +11,12 @@ use Rorm\Rorm;
  */
 class SQLiteTest extends PHPUnit_Framework_TestCase
 {
-    public function testDbhFlag()
+    public function testDbDriver()
     {
-        $this->assertTrue(Rorm::getDatabase('sqlite')->isSQLite);
+        $dbh = Rorm::getDatabase('sqlite');
+        $this->assertTrue(Rorm::isSQLite($dbh));
+        $this->assertFalse(Rorm::isMySQL($dbh));
+        $this->assertFalse(Rorm::isPostreSQL($dbh));
     }
 
     public function testQuote()

@@ -158,7 +158,7 @@ abstract class Model implements Iterator, JsonSerializable
          *
          * IDEA: probably split into methods (saveMySQL, savePostgreSQL, saveSQLite)
          */
-        if ($db->isPostgreSQL) {
+        if (Rorm::isPostreSQL($db)) {
             /**
              * PostgreSQL
              *
@@ -258,7 +258,7 @@ abstract class Model implements Iterator, JsonSerializable
 
                 return true;
             }
-        } elseif ($db->isMySQL) {
+        } elseif (Rorm::isMySQL($db)) {
             /**
              * MySQL
              * Instead of REPLACE INTO we use INSERT INTO ON DUPLICATE KEY UPDATE.
