@@ -292,7 +292,7 @@ abstract class Model implements Iterator, JsonSerializable
                 ' VALUES ' .
                 '(' . implode(', ', $insertData) . ')';
 
-            if ($doMerge) {
+            if ($doMerge && count($updateData) > 0) {
                 // update
                 $sql .= ' ON DUPLICATE KEY UPDATE ' . implode(', ', $updateData);
             }
