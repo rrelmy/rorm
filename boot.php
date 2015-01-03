@@ -26,7 +26,6 @@ spl_autoload_register(
                 __DIR__ . '/Tests/',
                 __DIR__ . '/TestsMySQL/',
                 __DIR__ . '/TestsSQLite/',
-                __DIR__ . '/TestsPostgreSQL/',
             );
         } else {
             $directories = explode(PATH_SEPARATOR, get_include_path());
@@ -49,5 +48,4 @@ require 'include.php';
 
 // boot database connections
 require 'boot-mysql.php';
-require 'boot-pgsql.php';
 require 'boot-sqlite.php';

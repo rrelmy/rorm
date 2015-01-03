@@ -19,7 +19,6 @@ class QueryDatabaseBasicTest extends PHPUnit_Framework_TestCase
         $dbh = Rorm::getDatabase();
         $this->assertTrue(Rorm::isMySQL($dbh));
         $this->assertFalse(Rorm::isSQLite($dbh));
-        $this->assertFalse(Rorm::isPostreSQL($dbh));
     }
 
     /**
@@ -289,12 +288,12 @@ class QueryDatabaseBasicTest extends PHPUnit_Framework_TestCase
         // insert data
         $insert = $dbh->prepare('INSERT INTO test_basic (name, number, active, deleted) VALUES(?, ?, ?, ?)');
 
-        $insert->execute(array('Lorem', 10, true, false));
-        $insert->execute(array('ipsum', 17, true, false));
-        $insert->execute(array('dolor', 12.5, true, false));
-        $insert->execute(array('sit amet', -10, true, false));
-        $insert->execute(array('Deleted', 0, false, true));
-        $insert->execute(array('Inactive', 0, false, false));
+        $insert->execute(array('Lorem', 10, 1, 0));
+        $insert->execute(array('ipsum', 17, 1, 0));
+        $insert->execute(array('dolor', 12.5, 1, 0));
+        $insert->execute(array('sit amet', -10, 1, 0));
+        $insert->execute(array('Deleted', 0, 0, 1));
+        $insert->execute(array('Inactive', 0, 0, 0));
 
         // count with query builder
         $query = Test_Basic::query()->where('active', true)->where('deleted', false)->orderByAsc('number');

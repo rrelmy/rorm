@@ -59,15 +59,6 @@ class Rorm
 
     /**
      * @param PDO $dbh
-     * @return bool
-     */
-    public static function isPostreSQL(PDO $dbh)
-    {
-        return $dbh->getAttribute(PDO::ATTR_DRIVER_NAME) == 'pgsql';
-    }
-
-    /**
-     * @param PDO $dbh
      * @param mixed $value
      * @return mixed
      */
@@ -75,13 +66,12 @@ class Rorm
     {
         if ($value === true) {
             /**
-             * Only PostgreSQL has an boolean type
              * MySQL has true and false literals
              * SQLite does not support boolean type nor literals
              */
-            return static::isMySQL($dbh) || static::isPostreSQL($dbh) ? 'TRUE' : 1;
+            return static::isMySQL($dbh) ? 'TRUE' : 1;
         } elseif ($value === false) {
-            return static::isMySQL($dbh) || static::isPostreSQL($dbh) ? 'FALSE' : 0;
+            return static::isMySQL($dbh) ? 'FALSE' : 0;
         } elseif ($value === null) {
             return 'NULL';
         } elseif (is_int($value)) {

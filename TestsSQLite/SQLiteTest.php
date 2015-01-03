@@ -16,7 +16,6 @@ class SQLiteTest extends PHPUnit_Framework_TestCase
         $dbh = Rorm::getDatabase('sqlite');
         $this->assertTrue(Rorm::isSQLite($dbh));
         $this->assertFalse(Rorm::isMySQL($dbh));
-        $this->assertFalse(Rorm::isPostreSQL($dbh));
     }
 
     public function testQuote()
