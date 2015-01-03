@@ -89,7 +89,7 @@ class Query
     {
         $this->statement = $this->dbh->prepare($this->query);
         // set fetchMode to assoc, it is easier to copy data from an array than an object
-        $this->statement->setFetchMode(PDO::FETCH_ASSOC);
+        $this->statement->setFetchMode(PDO::FETCH_CLASS, $this->class);
         return $this->statement->execute($this->params);
     }
 
@@ -98,30 +98,7 @@ class Query
      */
     public function fetch()
     {
-        $data = $this->statement->fetch();
-        if ($data !== false) {
-            return $this->instanceFromObject($data);
-        }
-        return null;
-    }
-
-    /**
-     * @param array $data
-     * @return object
-     */
-    public function instanceFromObject(array $data)
-    {
-        $instance = new $this->class;
-        if ($this->classIsOrmModel) {
-            /** @var \Rorm\Model $instance */
-            $instance->setData($data);
-        } else {
-            foreach ($data as $key => $value) {
-                $instance->$key = $value;
-            }
-        }
-
-        return $instance;
+        return $this->statement->fetch() ?: null;
     }
 
     /**
@@ -164,7 +141,7 @@ class Query
     public function findMany()
     {
         $this->execute();
-        return new QueryIterator($this->statement, $this);
+        return new QueryIterator($this->statement);
         // PHP 5.5 yield version for future use
         /*while ($object = $this->statement->fetchObject()) {
             yield $this->instanceFromObject($object);
