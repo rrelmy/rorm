@@ -71,6 +71,14 @@ abstract class Model implements Iterator, JsonSerializable
     }
 
     /**
+     * @return static[]
+     */
+    public static function findAll()
+    {
+        return static::query()->findAll();
+    }
+
+    /**
      * @return QueryBuilder
      */
     public static function query()

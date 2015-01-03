@@ -191,7 +191,7 @@ class QueryDatabaseBasicTest extends PHPUnit_Framework_TestCase
     public function testCompound()
     {
         // check if empty
-        $result = Test\Compound::query()->findAll();
+        $result = Test\Compound::findAll();
         $this->assertInternalType('array', $result);
         $this->assertEmpty($result);
 
@@ -250,7 +250,7 @@ class QueryDatabaseBasicTest extends PHPUnit_Framework_TestCase
         }
 
         // query buffered
-        $result = Test\Compound::query()->findAll();
+        $result = Test\Compound::findAll();
         $this->assertInternalType('array', $result);
         $this->assertNotEmpty($result);
         $this->assertContainsOnlyInstancesOf('\\RormTest\\Test\\Compound', $result);
