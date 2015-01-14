@@ -367,6 +367,7 @@ class QueryBuilder extends Query
      */
     public function findColumn()
     {
+        $this->limit(1);
         $this->build();
         return parent::findColumn();
     }
@@ -376,6 +377,7 @@ class QueryBuilder extends Query
      */
     public function findOne()
     {
+        $this->limit(1);
         $this->build();
         return parent::findOne();
     }
