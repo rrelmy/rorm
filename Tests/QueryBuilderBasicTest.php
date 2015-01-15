@@ -286,6 +286,20 @@ class QueryBuilderBasicTest extends PHPUnit_Framework_TestCase
     }
 
     /**
+     * @depends testBuild
+     */
+    public function testOrderExpression()
+    {
+        $query = QueryModel::query()
+            ->orderByExpr('RANDOM() ASC')
+            ->build();
+        $this->assertEquals(
+            'SELECT * FROM `test` ORDER BY RANDOM() ASC',
+            $query->getQuery()
+        );
+    }
+
+    /**
      * @depends testBuildWhere
      * @expectedException \Rorm\QueryBuilderException
      */

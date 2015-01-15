@@ -287,6 +287,18 @@ class QueryBuilder extends Query
         return $this;
     }
 
+    /**
+     * @param string $expression
+     * @param array $params
+     * @return $this
+     */
+    public function orderByExpr($expression, array $params = array())
+    {
+        $this->order[] = $expression;
+        $this->whereParams = array_merge($this->whereParams, $params);
+        return $this;
+    }
+
     // limit
     /**
      * @param int $limit
