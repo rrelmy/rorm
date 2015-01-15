@@ -31,7 +31,7 @@ class QueryBuilder extends Query
     protected $where = array();
 
     /** @var array */
-    protected $whereParams = array();
+    protected $buildParams = array();
 
     /** @var array */
     protected $order = array();
@@ -134,7 +134,7 @@ class QueryBuilder extends Query
     public function where($column, $value)
     {
         $this->where[] = $this->quoteIdentifier($column) . ' = ?';
-        $this->whereParams[] = $value;
+        $this->buildParams[] = $value;
         return $this;
     }
 
@@ -181,7 +181,7 @@ class QueryBuilder extends Query
     {
         $this->where[] = $where;
         foreach ($params as $param) {
-            $this->whereParams[] = $param;
+            $this->buildParams[] = $param;
         }
         return $this;
     }
@@ -196,7 +196,7 @@ class QueryBuilder extends Query
     public function whereLt($column, $value)
     {
         $this->where[] = $this->quoteIdentifier($column) . ' < ?';
-        $this->whereParams[] = $value;
+        $this->buildParams[] = $value;
         return $this;
     }
 
@@ -210,7 +210,7 @@ class QueryBuilder extends Query
     public function whereLte($column, $value)
     {
         $this->where[] = $this->quoteIdentifier($column) . ' <= ?';
-        $this->whereParams[] = $value;
+        $this->buildParams[] = $value;
         return $this;
     }
 
@@ -224,7 +224,7 @@ class QueryBuilder extends Query
     public function whereGt($column, $value)
     {
         $this->where[] = $this->quoteIdentifier($column) . ' > ?';
-        $this->whereParams[] = $value;
+        $this->buildParams[] = $value;
         return $this;
     }
 
@@ -238,7 +238,7 @@ class QueryBuilder extends Query
     public function whereGte($column, $value)
     {
         $this->where[] = $this->quoteIdentifier($column) . ' >= ?';
-        $this->whereParams[] = $value;
+        $this->buildParams[] = $value;
         return $this;
     }
 
@@ -262,7 +262,7 @@ class QueryBuilder extends Query
         $this->where[] = $this->quoteIdentifier($column) . ' IN (' .
             substr(str_repeat('?, ', count($data)), 0, -2) .
             ')';
-        $this->whereParams = array_merge($this->whereParams, $data);
+        $this->buildParams = array_merge($this->buildParams, $data);
         return $this;
     }
 
@@ -295,7 +295,7 @@ class QueryBuilder extends Query
     public function orderByExpr($expression, array $params = array())
     {
         $this->order[] = $expression;
-        $this->whereParams = array_merge($this->whereParams, $params);
+        $this->buildParams = array_merge($this->buildParams, $params);
         return $this;
     }
 
@@ -350,7 +350,7 @@ class QueryBuilder extends Query
             $query .= ' WHERE ' . implode(' AND ', $this->where);
 
             // params (CAUTION, we override the array, faster and not used before!)
-            $params = $this->whereParams;
+            $params = $this->buildParams;
         }
 
         // order
