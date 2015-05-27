@@ -139,6 +139,18 @@ class QueryBuilder extends Query
     }
 
     /**
+     * @param string $column
+     * @param mixed $value
+     * @return $this
+     */
+    public function whereNot($column, $value)
+    {
+        $this->where[] = $this->quoteIdentifier($column) . ' != ?';
+        $this->buildParams[] = $value;
+        return $this;
+    }
+
+    /**
      * @param mixed $id , ...
      * @return $this
      *
