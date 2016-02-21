@@ -1,0 +1,19 @@
+language: php
+php:
+  - '5.4'
+  - '5.5'
+  - '5.6'
+  - '7.0'
+  - hhvm
+  - nightly
+
+services:
+  - mysql
+
+mysql:
+  database: rorm
+  username: rorm
+  encoding: utf8
+
+before_script:
+  - echo "USE mysql;\nUPDATE user SET password=PASSWORD('secret') WHERE user='rorm';\nFLUSH PRIVILEGES;\n" | mysql -u root
