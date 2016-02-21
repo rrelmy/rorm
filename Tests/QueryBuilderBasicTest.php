@@ -2,8 +2,8 @@
 
 namespace RormTest;
 
-use RormTest\Test\Compound;
 use PHPUnit_Framework_TestCase;
+use RormTest\Test\Compound;
 use RormTest\Test\QueryModel;
 
 /**
@@ -38,6 +38,7 @@ class QueryBuilderBasicTest extends PHPUnit_Framework_TestCase
             ->whereLte('count', 20)
             ->whereRaw('`test` = YEAR(?)', array('2010-01-01'))
             ->whereNotNull('field')
+            ->whereNot('field', 123)
             ->whereRaw('`modified` < NOW()')
             ->where('id', 1);
 
@@ -225,6 +226,15 @@ class QueryBuilderBasicTest extends PHPUnit_Framework_TestCase
             ->build();
         $this->assertEquals(
             'SELECT * FROM `test` WHERE `modified` IS NOT NULL',
+            $queryNotNull->getQuery()
+        );
+
+        // not
+        $queryNotNull = QueryModel::query()
+            ->whereNot('field', 1234)
+            ->build();
+        $this->assertEquals(
+            "SELECT * FROM `test` WHERE `field` != ?",
             $queryNotNull->getQuery()
         );
     }
