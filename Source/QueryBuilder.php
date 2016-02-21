@@ -232,7 +232,7 @@ class QueryBuilder extends Query
      */
     public function whereGt($column, $value)
     {
-        $this->where[] = $this->quoteIdentifier($column) . ' > ?';
+        $this->where[] = $this->quoteIdentifier($column) . ' < ?';
         $this->buildParams[] = $value;
         return $this;
     }
