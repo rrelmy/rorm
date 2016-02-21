@@ -29,14 +29,16 @@ class Rorm
 
     /**
      * @param string $connection
-     * @return PDO|null
+     * @return PDO
+     * @throws Exception
      */
     public static function getDatabase($connection = self::CONNECTION_DEFAULT)
     {
         if (array_key_exists($connection, static::$connections)) {
             return static::$connections[$connection];
         }
-        return null;
+
+        throw new Exception('Database connection not found!');
     }
 
     /**
@@ -86,7 +88,7 @@ class Rorm
      * Method to quote identifiers
      * Please make sure you keep the quoter as long you are needing it.
      *
-     * @param \PDO $dbh
+     * @param \PDO|null $dbh
      * @return callable
      */
     public static function getIdentifierQuoter(PDO $dbh = null)

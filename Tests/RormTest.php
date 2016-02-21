@@ -25,7 +25,14 @@ class RormTest extends PHPUnit_Framework_TestCase
     public function testGetDatabase()
     {
         $this->assertInstanceOf('PDO', Rorm::getDatabase());
-        $this->assertNull(Rorm::getDatabase('unknown_connection'));
+    }
+
+    /**
+     * @expectedException \Rorm\Exception
+     */
+    public function testGetUnknownDatabase()
+    {
+        Rorm::getDatabase('unknown_connection');
     }
 
     /**

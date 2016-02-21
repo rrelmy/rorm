@@ -46,7 +46,7 @@ class QueryBuilder extends Query
      * @param string $table
      * @param string|array $idColumn
      * @param string $class
-     * @param \PDO $dbh
+     * @param \PDO|null $dbh
      */
     public function __construct($table, $idColumn, $class = 'stdClass', PDO $dbh = null)
     {
@@ -97,23 +97,17 @@ class QueryBuilder extends Query
 
     /**
      * @param string $column
-     * @param string $as
+     * @param string|null $as
      * @return $this
      */
     public function select($column, $as = null)
     {
-        $select = $this->quoteIdentifier($column);
-        if ($as !== null) {
-            $select .= ' AS ' . $this->quoteIdentifier($as);
-        }
-        $this->select[] = $select;
-
-        return $this;
+        return $this->selectExpr($this->quoteIdentifier($column), $as);
     }
 
     /**
      * @param string $expression
-     * @param string $as
+     * @param string|null $as
      * @return $this
      */
     public function selectExpr($expression, $as = null)
@@ -360,7 +354,7 @@ class QueryBuilder extends Query
         }
 
         // select
-        if ($this->select) {
+        if (!empty($this->select)) {
             $query .= implode(', ', $this->select);
         } else {
             // select everything
@@ -371,7 +365,7 @@ class QueryBuilder extends Query
         $query .= ' FROM ' . $this->quoteIdentifier($this->table);
 
         // where
-        if ($this->where) {
+        if (!empty($this->where)) {
             $query .= ' WHERE ' . implode(' AND ', $this->where);
 
             // params (CAUTION, we override the array, faster and not used before!)
@@ -379,7 +373,7 @@ class QueryBuilder extends Query
         }
 
         // order
-        if ($this->order) {
+        if (!empty($this->order)) {
             $query .= ' ORDER BY ' . implode(', ', $this->order);
         }
 
@@ -400,7 +394,7 @@ class QueryBuilder extends Query
     }
 
     /**
-     * @return mixed
+     * @return string|null
      */
     public function findColumn()
     {

@@ -6,6 +6,7 @@
 namespace Rorm;
 
 use Iterator;
+use Traversable;
 use JsonSerializable;
 
 /**
@@ -95,7 +96,7 @@ abstract class Model implements Iterator, JsonSerializable
     {
         $ormQuery = new Query(get_called_class(), static::getDatabase());
         $ormQuery->setQuery($query);
-        if ($params) {
+        if (!empty($params)) {
             $ormQuery->setParams($params);
         }
         return $ormQuery;
@@ -370,7 +371,7 @@ abstract class Model implements Iterator, JsonSerializable
     }
 
     /**
-     * @param \stdClass|array|Iterator $object
+     * @param array|Traversable $object
      * @param array $except
      */
     public function copyDataFrom($object, array $except = array())

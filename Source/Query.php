@@ -94,7 +94,7 @@ class Query
     }
 
     /**
-     * @return mixed|null
+     * @return object|null
      */
     public function fetch()
     {
@@ -125,7 +125,7 @@ class Query
     }
 
     /**
-     * @return mixed
+     * @return string|null
      */
     public function findColumn()
     {
@@ -138,7 +138,7 @@ class Query
     /**
      * Return one object
      *
-     * @return mixed
+     * @return object|null
      */
     public function findOne()
     {
