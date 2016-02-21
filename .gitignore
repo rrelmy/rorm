@@ -15,6 +15,7 @@ $RECYCLE.BIN/
 .*
 !.gitignore
 !.ht*
+!.scrutinizer.yml
 *~
 
 # Mac

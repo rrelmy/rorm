@@ -1,0 +1,85 @@
+tools:
+  php_sim: true
+  php_analyzer: true
+  php_cs_fixer:
+    config: { level: psr2 }
+  php_code_sniffer:
+    config:
+      standard: "PSR2"
+
+filter:
+  excluded_paths:
+    - 'Compatibility/*'
+    - 'Tests/*'
+    - 'TestsMySQL/*'
+    - 'TestsSQLite/*'
+    - 'boot.php'
+    - 'boot-mysql.php'
+    - 'boot-sqlite.php'
+    - 'include.php'
+
+build:
+  environment:
+    php:
+      version: 5.6
+  dependencies:
+    before:
+      - mysql -uroot -e "CREATE DATABASE rorm"
+      - mysql -uroot -e "CREATE USER 'rorm'@'localhost' IDENTIFIED BY 'secret'";
+      - mysql -uroot -e "GRANT ALL PRIVILEGES ON *.* TO 'rorm'@'localhost' WITH GRANT OPTION";
+  tests:
+    override:
+      -
+        command: 'phpunit --coverage-clover=code-coverage'
+        coverage:
+          file: 'code-coverage'
+          format: 'php-clover'
+
+checks:
+    php:
+        sql_injection_vulnerabilities: true
+        security_vulnerabilities: true
+        no_eval: true
+        uppercase_constants: true
+        simplify_boolean_return: true
+        use_self_instead_of_fqcn: true
+        return_doc_comments: true
+        prefer_while_loop_over_for_loop: true
+        avoid_fixme_comments: true
+        avoid_todo_comments: true
+        encourage_single_quotes: true
+        return_doc_comment_if_not_inferrable: true
+        remove_extra_empty_lines: true
+        phpunit_assertions: true
+        parameters_in_camelcaps: true
+        parameter_doc_comments: true
+        optional_parameters_at_the_end: true
+        param_doc_comment_if_not_inferrable: true
+        align_assignments: true
+        avoid_multiple_statements_on_same_line: true
+        avoid_perl_style_comments: true
+        avoid_unnecessary_concatenation: true
+        classes_in_camel_caps: true
+        encourage_postdec_operator: true
+        fix_line_ending: true
+        fix_use_statements:
+            remove_unused: true
+            preserve_multiple: false
+            preserve_blanklines: false
+            order_alphabetically: false
+        function_in_camel_caps: true
+        line_length:
+            max_length: '120'
+        more_specific_types_in_doc_comments: true
+        newline_at_end_of_file: true
+        no_goto: true
+        no_long_variable_names:
+            maximum: '20'
+        no_short_method_names:
+            minimum: '3'
+        no_short_variable_names:
+            minimum: '2'
+        fix_doc_comments: true
+
+coding_style:
+    php: {  }

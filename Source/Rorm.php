@@ -89,7 +89,7 @@ class Rorm
      * Please make sure you keep the quoter as long you are needing it.
      *
      * @param \PDO|null $dbh
-     * @return callable
+     * @return \Closure
      */
     public static function getIdentifierQuoter(PDO $dbh = null)
     {

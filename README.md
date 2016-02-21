@@ -4,6 +4,10 @@ Rorm
  - License: MIT
  - Version: 0.1
 
+[![Build Status](https://scrutinizer-ci.com/g/rrelmy/rorm/badges/build.png?b=master)](https://scrutinizer-ci.com/g/rrelmy/rorm/build-status/master)
+[![Code Coverage](https://scrutinizer-ci.com/g/rrelmy/rorm/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/rrelmy/rorm/?branch=master)
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/rrelmy/rorm/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/rrelmy/rorm/?branch=master)
+
 Requirements
 ------------
  - PHP 5.3
