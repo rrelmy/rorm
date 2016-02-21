@@ -16,6 +16,7 @@ $RECYCLE.BIN/
 !.gitignore
 !.ht*
 !.scrutinizer.yml
+!.travis.yml
 *~
 
 # Mac
