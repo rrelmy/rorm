@@ -62,7 +62,7 @@ class Rorm
     /**
      * @param PDO $dbh
      * @param mixed $value
-     * @return mixed
+     * @return string|integer|double
      */
     public static function quote(PDO $dbh, $value)
     {

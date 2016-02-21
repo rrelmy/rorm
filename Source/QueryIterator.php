@@ -14,9 +14,7 @@ use PDOStatement;
  */
 class QueryIterator extends IteratorIterator
 {
-    /**
-     * @var Query
-     */
+    /** @var Query */
     protected $caller;
 
     /** @var bool */
@@ -49,7 +47,7 @@ class QueryIterator extends IteratorIterator
     /**
      * Transform plain object returned by PDOStatement to the desired model
      *
-     * @return mixed
+     * @return object
      */
     public function current()
     {

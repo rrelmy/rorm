@@ -45,7 +45,7 @@ abstract class Model implements Iterator, JsonSerializable
     }
 
     /**
-     * @return \PDO|null
+     * @return \PDO
      */
     public static function getDatabase()
     {

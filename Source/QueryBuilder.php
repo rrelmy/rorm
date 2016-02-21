@@ -404,7 +404,7 @@ class QueryBuilder extends Query
     }
 
     /**
-     * @return mixed
+     * @return object|null
      */
     public function findOne()
     {

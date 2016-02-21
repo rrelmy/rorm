@@ -31,7 +31,7 @@ class Query
 
     /**
      * @param string $class
-     * @param PDO $dbh if null the default database connection is used
+     * @param PDO|null $dbh if null the default database connection is used
      */
     public function __construct($class = 'stdClass', PDO $dbh = null)
     {
