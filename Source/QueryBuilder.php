@@ -77,6 +77,9 @@ class QueryBuilder extends Query
     }
 
     // select
+    /**
+     * @return $this
+     */
     public function distinct()
     {
         $this->distinct = true;
