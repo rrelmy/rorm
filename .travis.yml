@@ -16,4 +16,4 @@ mysql:
   encoding: utf8
 
 before_script:
-  - echo "USE mysql;\nUPDATE user SET password=PASSWORD('secret') WHERE user='rorm';\nFLUSH PRIVILEGES;\n" | mysql -u root
+  - echo "CREATE DATABASE rorm;\nCREATE USER 'rorm'@'localhost' IDENTIFIED BY 'secret';GRANT ALL PRIVILEGES ON *.* TO 'rorm'@'localhost' WITH GRANT OPTION;\n"  | mysql -u root
