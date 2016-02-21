@@ -37,6 +37,7 @@ class QueryBuilderBasicTest extends PHPUnit_Framework_TestCase
             ->whereLt('count', 20)
             ->whereLte('count', 20)
             ->whereRaw('`test` = YEAR(?)', array('2010-01-01'))
+            ->whereNull('field')
             ->whereNotNull('field')
             ->whereNot('field', 123)
             ->whereRaw('`modified` < NOW()')
@@ -226,6 +227,15 @@ class QueryBuilderBasicTest extends PHPUnit_Framework_TestCase
             ->build();
         $this->assertEquals(
             'SELECT * FROM `test` WHERE `modified` IS NOT NULL',
+            $queryNotNull->getQuery()
+        );
+
+        // null
+        $queryNotNull = QueryModel::query()
+            ->whereNull('field')
+            ->build();
+        $this->assertEquals(
+            'SELECT * FROM `test` WHERE `field` IS NULL',
             $queryNotNull->getQuery()
         );
 

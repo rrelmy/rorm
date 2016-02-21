@@ -269,6 +269,16 @@ class QueryBuilder extends Query
 
     /**
      * @param string $column
+     * @return $this
+     */
+    public function whereNull($column)
+    {
+        $this->where[] = $this->quoteIdentifier($column) . ' IS NULL';
+        return $this;
+    }
+
+    /**
+     * @param string $column
      * @param array $data
      * @return $this
      */
