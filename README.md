@@ -1,7 +1,7 @@
 Rorm
 ====
  - Author: Rémy M. Böhler <code@rrelmy.ch>
- - License: GPL v3
+ - License: MIT
  - Version: 0.1
 
 Requirements
