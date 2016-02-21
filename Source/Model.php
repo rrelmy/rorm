@@ -326,14 +326,11 @@ abstract class Model implements Iterator, JsonSerializable
     /**
      * Remove data from the model
      *
-     * ATTENTION:
-     * with the goal to only set the data we have this method can lead to unexpected behaviour
-     *
      * @param string $name
      */
     public function remove($name)
     {
-        unset($this->_data[$name]);
+        $this->_data[$name] = null;
     }
 
     /**

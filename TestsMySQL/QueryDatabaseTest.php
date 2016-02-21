@@ -2,11 +2,11 @@
 
 namespace RormTest;
 
-use Rorm\Rorm;
-use RormTest\Test\Compound;
-use PHPUnit_Framework_TestCase;
 use Exception;
 use PDOException;
+use PHPUnit_Framework_TestCase;
+use Rorm\Rorm;
+use RormTest\Test\Compound;
 use Test_Basic;
 
 /**
@@ -88,11 +88,13 @@ class QueryDatabaseBasicTest extends PHPUnit_Framework_TestCase
 
         // update
         $model->name = 'Lorem ipsum';
+        $model->remove('active');
         $this->assertTrue($model->save());
 
         // re load
         $modelLoaded = Test_Basic::find($model->id);
         $this->assertEquals($model->id, $modelLoaded->id);
+        $this->assertNull($modelLoaded->active, 'remove() should remove the data');
 
         // sleep to check the modified column with ignoreColumn
         sleep(1.2);
