@@ -155,6 +155,7 @@ abstract class Model implements Iterator, JsonSerializable
         if (!is_array($idColumns)) {
             $idColumns = array($idColumns);
         }
+        $doMerge = $this->hasId();
 
         // ignore fields
         $notSetFields = static::$_ignoreColumns;
@@ -173,12 +174,8 @@ abstract class Model implements Iterator, JsonSerializable
              */
             $sql = 'INSERT INTO ' . $quotedTable . ' ';
 
-            $doMerge = $this->hasId();
-
             $insertData = array();
-            if ($doMerge) {
-                $updateData = array();
-            }
+            $updateData = array();
 
             foreach ($this->_data as $column => $value) {
                 if (in_array($column, $notSetFields)) {
@@ -221,7 +218,11 @@ abstract class Model implements Iterator, JsonSerializable
             /**
              * SQLite
              */
-            $sql = 'INSERT OR REPLACE INTO ' . $quotedTable . ' ';
+            if ($doMerge) {
+                $sql = 'INSERT OR REPLACE INTO ' . $quotedTable . ' ';
+            } else {
+                $sql = 'INSERT INTO ' . $quotedTable . ' ';
+            }
 
             // build (column) VALUES (values)
             $quotedData = array();

@@ -321,4 +321,21 @@ class QueryDatabaseBasicTest extends PHPUnit_Framework_TestCase
         $this->assertInstanceOf('Test_Basic', $model);
         $this->assertEquals(-10, $model->number);
     }
+
+    /**
+     * @expectedException PDOException
+     * @expectedExceptionCode 23000
+     */
+    public function testUniqueKeyHandling()
+    {
+        $userA = Test_Basic::create();
+        $userA->name = 'User A';
+        $userA->email = 'info@example.org';
+        $this->assertTrue($userA->save());
+
+        $userB = Test_Basic::create();
+        $userB->name = 'User B';
+        $userB->email = 'info@example.org';
+        $userB->save();
+    }
 }

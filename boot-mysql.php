@@ -22,6 +22,7 @@ $setupDatabaseMySQL = function () {
         'CREATE TABLE test_basic (
             id INT UNSIGNED AUTO_INCREMENT,
             name VARCHAR(255),
+            email VARCHAR(255) UNIQUE,
             number DECIMAL(10,2),
             modified TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
             active TINYINT(1) DEFAULT 0,

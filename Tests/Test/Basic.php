@@ -7,6 +7,7 @@ use Rorm\Model;
 /**
  * @property int $id
  * @property string $name
+ * @property string $email
  * @property float $number
  * @property string $modified
  * @property bool $active

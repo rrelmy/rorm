@@ -9,6 +9,7 @@ use Rorm\Model;
 /**
  * @property int $rowid
  * @property string $name
+ * @property string $email
  * @property float $number
  * @property bool $active
  * @property bool $deleted

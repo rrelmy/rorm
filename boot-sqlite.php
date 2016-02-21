@@ -20,6 +20,7 @@ $setupDatabaseSQLite = function () {
         'CREATE TABLE modelsqlite (
              rowid INTEGER PRIMARY KEY AUTOINCREMENT,
              name TEXT NOT NULL,
+             email TEXT UNIQUE,
              number REAL,
              active INTEGER,
              deleted INTEGER

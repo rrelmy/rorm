@@ -3,6 +3,7 @@ namespace RormTest;
 
 use Exception;
 use PDO;
+use PDOException;
 use PHPUnit_Framework_TestCase;
 use Rorm\Rorm;
 
@@ -218,5 +219,22 @@ class SQLiteTest extends PHPUnit_Framework_TestCase
         foreach ($result as $model) {
             $this->assertInstanceOf('\\RormTest\\ModelSQLiteCompound', $model);
         }
+    }
+
+    /**
+     * @expectedException PDOException
+     * @expectedExceptionCode 23000
+     */
+    public function testUniqueKeyHandling()
+    {
+        $userA = ModelSQLite::create();
+        $userA->name = 'User A';
+        $userA->email = 'info@example.org';
+        $this->assertTrue($userA->save());
+
+        $userB = ModelSQLite::create();
+        $userB->name = 'User B';
+        $userB->email = 'info@example.org';
+        $userB->save();
     }
 }
