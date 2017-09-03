@@ -205,7 +205,7 @@ abstract class Model implements Iterator, JsonSerializable
 
             // execute (most likely throws PDOException if there is an error)
             if ($dbh->exec($sql) === false) {
-                return false;
+                return false; // @codeCoverageIgnore
             }
 
             // update generated id
@@ -240,7 +240,7 @@ abstract class Model implements Iterator, JsonSerializable
 
             // execute (most likely throws PDOException if there is an error)
             if ($dbh->exec($sql) === false) {
-                return false;
+                return false; // @codeCoverageIgnore
             }
 
             // update generated id
