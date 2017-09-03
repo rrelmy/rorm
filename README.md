@@ -12,12 +12,7 @@ Rorm
 
 Requirements
 ------------
- - PHP 5.3
-
-PHP 5.3 requires a `JsonSerializable` polyfill for the Model.
-
-With PHP 5.5 we could ditch the `QueryIterator` and use `yield`.
-Yield seems to have a little bit bigger memory footprint.
+ - PHP 7.1
 
 Goals
 -----
