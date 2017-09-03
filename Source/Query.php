@@ -2,6 +2,7 @@
 /**
  * @author Rémy M. Böhler <code@rrelmy.ch>
  */
+declare(strict_types=1);
 
 namespace Rorm;
 
@@ -89,7 +90,7 @@ class Query
         return $instance;
     }
 
-    public function findColumn():? string
+    public function findColumn()
     {
         if ($this->execute()) {
             return $this->statement->fetchColumn();

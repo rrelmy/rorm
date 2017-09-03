@@ -2,6 +2,7 @@
 /**
  * @author Rémy M. Böhler <code@rrelmy.ch>
  */
+declare(strict_types=1);
 
 namespace Rorm;
 
@@ -95,14 +96,14 @@ class QueryBuilder extends Query
 
 
     // where
-    public function where(string $column, string $value): QueryBuilder
+    public function where(string $column, $value): QueryBuilder
     {
         $this->where[] = $this->quoteIdentifier($column) . ' = ?';
         $this->buildParams[] = $value;
         return $this;
     }
 
-    public function whereNot(string $column, string $value): QueryBuilder
+    public function whereNot(string $column, $value): QueryBuilder
     {
         $this->where[] = $this->quoteIdentifier($column) . ' != ?';
         $this->buildParams[] = $value;
@@ -277,7 +278,7 @@ class QueryBuilder extends Query
         return $this;
     }
 
-    public function findColumn(): ?string
+    public function findColumn()
     {
         $this->limit(1);
         $this->build();
