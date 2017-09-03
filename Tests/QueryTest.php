@@ -2,6 +2,7 @@
 /**
  * @author: remy
  */
+declare(strict_types=1);
 
 namespace RormTest;
 

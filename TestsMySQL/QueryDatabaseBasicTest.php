@@ -2,6 +2,7 @@
 /**
  * @author: remy
  */
+declare(strict_types=1);
 
 namespace RormTest;
 
@@ -103,7 +104,7 @@ class QueryDatabaseBasicTest extends TestCase
         $this->assertNull($modelLoaded->active, 'remove() should remove the data');
 
         // sleep to check the modified column with ignoreColumn
-        sleep(1.2);
+        usleep(1500000);
 
         // update loaded (test ignore fields)
         ++$modelLoaded->number;
