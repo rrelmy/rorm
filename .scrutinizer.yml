@@ -9,7 +9,6 @@ tools:
 
 filter:
   excluded_paths:
-    - 'Compatibility/*'
     - 'Tests/*'
     - 'TestsMySQL/*'
     - 'TestsSQLite/*'
@@ -21,7 +20,7 @@ filter:
 build:
   environment:
     php:
-      version: 5.6
+      version: 7.1
   dependencies:
     before:
       - mysql -uroot -e "CREATE DATABASE rorm"
