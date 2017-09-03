@@ -132,7 +132,7 @@ class Query
         if ($this->execute()) {
             return $this->statement->fetchColumn();
         }
-        return null;
+        return null; // @codeCoverageIgnore
     }
 
     /**
@@ -146,7 +146,7 @@ class Query
         if ($this->execute()) {
             return $this->fetch();
         }
-        return null;
+        return null; // @codeCoverageIgnore
     }
 
     /**
