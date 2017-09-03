@@ -44,7 +44,7 @@ class ModelExtendedTest extends TestCase
 
         // params
         $sqlParams = 'SELECT id, name FROM test_basic WHERE active = ? ORDER BY modified';
-        $params = array(75);
+        $params = [75];
         $queryParam = TestBasic::customQuery($sqlParams, $params);
         $this->assertEquals($sqlParams, $queryParam->getQuery());
         $this->assertEquals($params, $queryParam->getParams());

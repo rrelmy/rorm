@@ -16,7 +16,7 @@ use Rorm\Model;
 class Compound extends Model
 {
     /** @var string|array */
-    public static $_idColumn = array('foo_id', 'bar_id');
+    public static $_idColumn = ['foo_id', 'bar_id'];
 
     /** @var bool */
     public static $_autoId = false;

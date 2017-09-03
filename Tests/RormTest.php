@@ -52,12 +52,12 @@ class RormTest extends TestCase
      */
     public function providerQuoteIdentifierMySQL()
     {
-        return array(
-            array('test', '`test`'),
-            array('lorem ipsum', '`lorem ipsum`'),
-            array('te`st', '`te``st`'),
-            array('`test`', '```test```'),
-        );
+        return [
+            ['test', '`test`'],
+            ['lorem ipsum', '`lorem ipsum`'],
+            ['te`st', '`te``st`'],
+            ['`test`', '```test```'],
+        ];
     }
 
     /**
@@ -79,12 +79,12 @@ class RormTest extends TestCase
      */
     public function providerQuoteIdentifier()
     {
-        return array(
-            array('test', '"test"'),
-            array('lorem ipsum', '"lorem ipsum"'),
-            array('te"st', '"te""st"'),
-            array('"test"', '"""test"""'),
-        );
+        return [
+            ['test', '"test"'],
+            ['lorem ipsum', '"lorem ipsum"'],
+            ['te"st', '"te""st"'],
+            ['"test"', '"""test"""'],
+        ];
     }
 
     /**

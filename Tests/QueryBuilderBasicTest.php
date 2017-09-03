@@ -41,7 +41,7 @@ class QueryBuilderBasicTest extends TestCase
             ->whereGte('count', 10)
             ->whereLt('count', 20)
             ->whereLte('count', 20)
-            ->whereRaw('`test` = YEAR(?)', array('2010-01-01'))
+            ->whereRaw('`test` = YEAR(?)', ['2010-01-01'])
             ->whereNull('field')
             ->whereNotNull('field')
             ->whereNot('field', 123)
@@ -141,7 +141,7 @@ class QueryBuilderBasicTest extends TestCase
         $queryBasic = QueryModel::query();
         $queryBasic->where('id', 1);
         $this->assertEquals('SELECT * FROM `test` WHERE `id` = ?', $queryBasic->build()->getQuery());
-        $this->assertEquals(array(1), $queryBasic->getParams());
+        $this->assertEquals([1], $queryBasic->getParams());
 
         // multiple
         $queryMultiple = QueryModel::query()
@@ -153,7 +153,7 @@ class QueryBuilderBasicTest extends TestCase
             $queryMultiple->getQuery()
         );
         $this->assertEquals(
-            array(1, 'loremipsum'),
+            [1, 'loremipsum'],
             $queryMultiple->getParams()
         );
 
@@ -167,7 +167,7 @@ class QueryBuilderBasicTest extends TestCase
             $queryId->getQuery()
         );
         $this->assertEquals(
-            array(10),
+            [10],
             $queryId->getParams()
         );
 
@@ -180,7 +180,7 @@ class QueryBuilderBasicTest extends TestCase
             $queryIdCompound->getQuery()
         );
         $this->assertEquals(
-            array(5, 75),
+            [5, 75],
             $queryIdCompound->getParams()
         );
 
@@ -196,16 +196,16 @@ class QueryBuilderBasicTest extends TestCase
 
         // raw
         $queryRaw = QueryModel::query()
-            ->whereRaw('1 < ?', array(20))
+            ->whereRaw('1 < ?', [20])
             ->whereRaw('`modified` <= NOW()')
-            ->whereRaw('SUM(`number`) < ? AND YEAR(NOW()) <= ?', array(100, 2010))
+            ->whereRaw('SUM(`number`) < ? AND YEAR(NOW()) <= ?', [100, 2010])
             ->build();
         $this->assertEquals(
             'SELECT * FROM `test` WHERE 1 < ? AND `modified` <= NOW() AND SUM(`number`) < ? AND YEAR(NOW()) <= ?',
             $queryRaw->getQuery()
         );
         $this->assertEquals(
-            array(20, 100, 2010),
+            [20, 100, 2010],
             $queryRaw->getParams()
         );
 
@@ -222,7 +222,7 @@ class QueryBuilderBasicTest extends TestCase
             $queryCompare->getQuery()
         );
         $this->assertEquals(
-            array(10, 20, 0, 75),
+            [10, 20, 0, 75],
             $queryCompare->getParams()
         );
 
@@ -249,7 +249,7 @@ class QueryBuilderBasicTest extends TestCase
             ->whereNot('field', 1234)
             ->build();
         $this->assertEquals(
-            "SELECT * FROM `test` WHERE `field` != ?",
+            'SELECT * FROM `test` WHERE `field` != ?',
             $queryNotNull->getQuery()
         );
     }
@@ -260,21 +260,21 @@ class QueryBuilderBasicTest extends TestCase
     public function testBuildWhereIn()
     {
         $query = QueryModel::query()
-            ->whereIn('number', array(10, 7, 80.76))
+            ->whereIn('number', [10, 7, 80.76])
             ->build();
         $this->assertEquals(
             'SELECT * FROM `test` WHERE `number` IN (?, ?, ?)',
             $query->getQuery()
         );
         $this->assertEquals(
-            array(10, 7, 80.76),
+            [10, 7, 80.76],
             $query->getParams()
         );
 
         // build extended
         $queryExtended = QueryModel::query()
             ->where('number', 10)
-            ->whereIn('number', array(10, 7, 80.76))
+            ->whereIn('number', [10, 7, 80.76])
             ->where('id', 18)
             ->build();
         $this->assertEquals(
@@ -282,7 +282,7 @@ class QueryBuilderBasicTest extends TestCase
             $queryExtended->getQuery()
         );
         $this->assertEquals(
-            array(10, 10, 7, 80.76, 18),
+            [10, 10, 7, 80.76, 18],
             $queryExtended->getParams()
         );
     }

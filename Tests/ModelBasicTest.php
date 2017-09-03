@@ -40,10 +40,10 @@ class ModelBasicTest extends TestCase
     {
         $object = TestBasic::create();
         $object->setData(
-            array(
+            [
                 'id' => 10,
                 'active' => true,
-            )
+            ]
         );
         $this->assertEquals(10, $object->get('id'));
         $this->assertEquals(true, $object->active);
@@ -78,14 +78,15 @@ class ModelBasicTest extends TestCase
      */
     public function testIterator()
     {
+        /** @var TestBasic $object */
         $object = TestBasic::create();
         $object->setData(
-            array(
+            [
                 'id' => 1,
                 'name' => 'ipsum',
                 'active' => true,
                 'deleted' => false,
-            )
+            ]
         );
 
         foreach ($object as $key => $value) {
@@ -115,11 +116,11 @@ class ModelBasicTest extends TestCase
     {
         $a = TestBasic::create();
         $a->setData(
-            array(
+            [
                 'id' => 1,
                 'name' => 'ipsum',
                 'active' => true,
-            )
+            ]
         );
 
         $b = TestBasic::create();
@@ -151,11 +152,11 @@ class ModelBasicTest extends TestCase
     public function testJsonEncode()
     {
         $a = TestBasic::create();
-        $data = array(
+        $data = [
             'id' => 1,
             'name' => 'ipsum',
             'active' => true,
-        );
+        ];
         $a->setData($data);
 
         $this->assertEquals(json_encode($data), json_encode($a));
@@ -185,14 +186,14 @@ class ModelBasicTest extends TestCase
         $compoundModel = Compound::create();
         $this->assertFalse($compoundModel->hasId());
         $compoundModel->setData(
-            array(
+            [
                 'foo_id' => 1,
                 'bar_id' => 77,
                 'name' => 'Foo Bar',
-            )
+            ]
         );
 
         $this->assertTrue($compoundModel->hasId());
-        $this->assertEquals(array('foo_id' => 1, 'bar_id' => 77), $compoundModel->getId());
+        $this->assertEquals(['foo_id' => 1, 'bar_id' => 77], $compoundModel->getId());
     }
 }

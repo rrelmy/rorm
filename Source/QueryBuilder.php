@@ -2,6 +2,7 @@
 /**
  * @author Rémy M. Böhler <code@rrelmy.ch>
  */
+
 namespace Rorm;
 
 use PDO;
@@ -25,16 +26,16 @@ class QueryBuilder extends Query
     protected $distinct = false;
 
     /** @var array */
-    protected $select = array();
+    protected $select = [];
 
     /** @var array */
-    protected $where = array();
+    protected $where = [];
 
     /** @var array */
-    protected $buildParams = array();
+    protected $buildParams = [];
 
     /** @var array */
-    protected $order = array();
+    protected $order = [];
 
     /** @var int */
     protected $limit;
@@ -53,7 +54,7 @@ class QueryBuilder extends Query
         parent::__construct($class, $dbh);
 
         $this->table = $table;
-        $this->idColumn = is_array($idColumn) ? $idColumn : array($idColumn);
+        $this->idColumn = (array)$idColumn;
         $this->quoteIdentifier = Rorm::getIdentifierQuoter($this->dbh);
     }
 
@@ -77,6 +78,7 @@ class QueryBuilder extends Query
     }
 
     // select
+
     /**
      * @return $this
      */
@@ -123,6 +125,7 @@ class QueryBuilder extends Query
 
 
     // where
+
     /**
      * @param string $column
      * @param mixed $value
@@ -186,7 +189,7 @@ class QueryBuilder extends Query
      * @param array $params
      * @return $this
      */
-    public function whereRaw($where, array $params = array())
+    public function whereRaw($where, array $params = [])
     {
         $this->where[] = $where;
         foreach ($params as $param) {
@@ -286,6 +289,7 @@ class QueryBuilder extends Query
     }
 
     // order by
+
     /**
      * @param string $column
      * @return $this
@@ -311,7 +315,7 @@ class QueryBuilder extends Query
      * @param array $params
      * @return $this
      */
-    public function orderByExpr($expression, array $params = array())
+    public function orderByExpr($expression, array $params = [])
     {
         $this->order[] = $expression;
         $this->buildParams = array_merge($this->buildParams, $params);
@@ -319,6 +323,7 @@ class QueryBuilder extends Query
     }
 
     // limit
+
     /**
      * @param int $limit
      * @return $this
@@ -341,12 +346,13 @@ class QueryBuilder extends Query
 
 
     // execute
+
     /**
      * @return $this
      */
     public function build()
     {
-        $params = array();
+        $params = [];
         $query = 'SELECT ';
 
         if ($this->distinct) {
@@ -440,7 +446,7 @@ class QueryBuilder extends Query
     public function count()
     {
         $select = $this->select;
-        $this->select = array('COUNT(*)');
+        $this->select = ['COUNT(*)'];
         $count = $this->findColumn();
         $this->select = $select;
 

@@ -47,7 +47,7 @@ class QueryTest extends TestCase
         $query = new Query();
         $this->assertNull($query->getParams());
 
-        $params = array(1, 2, 3);
+        $params = [1, 2, 3];
         $query->setParams($params);
 
         $this->assertEquals($params, $query->getParams());
@@ -61,13 +61,13 @@ class QueryTest extends TestCase
         $query = new Query(TestBasic::class);
         /** @var TestBasic $instance */
         $instance = $query->instanceFromObject(
-            array(
+            [
                 'id' => 7,
                 'name' => 'Test',
                 'number' => 75.3,
                 'active' => true,
                 'deleted' => false,
-            )
+            ]
         );
 
         $this->assertInstanceOf(TestBasic::class, $instance);
@@ -86,13 +86,13 @@ class QueryTest extends TestCase
         $query = new Query();
         /** @var \stdClass $instance */
         $instance = $query->instanceFromObject(
-            array(
+            [
                 'id' => 7,
                 'name' => 'Test',
                 'number' => 75.3,
                 'active' => true,
                 'deleted' => false,
-            )
+            ]
         );
 
         $this->assertInstanceOf('stdClass', $instance);

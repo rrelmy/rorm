@@ -37,7 +37,7 @@ class Query
     {
         $this->class = $class;
         $this->classIsOrmModel = is_subclass_of($this->class, Model::class);
-        $this->dbh = $dbh ? $dbh : Rorm::getDatabase();
+        $this->dbh = $dbh ?: Rorm::getDatabase();
     }
 
     /**
@@ -178,7 +178,7 @@ class Query
      */
     public function findAll()
     {
-        $result = array();
+        $result = [];
 
         foreach ($this->findMany() as $object) {
             $result[] = $object;

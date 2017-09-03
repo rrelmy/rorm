@@ -163,8 +163,8 @@ class QueryDatabaseBasicTest extends TestCase
             ->where('active', true)
             ->where('deleted', false)
             ->whereNotNull('name')
-            ->whereRaw('name = ?', array($model->name))
-            ->whereIn('name', array('Lorem', 'ipsum', 'QueryBuilder'))
+            ->whereRaw('name = ?', [$model->name])
+            ->whereIn('name', ['Lorem', 'ipsum', 'QueryBuilder'])
             ->whereGt('number', 0)
             ->whereGte('number', 5)
             ->whereLt('number', 90)
@@ -296,12 +296,12 @@ class QueryDatabaseBasicTest extends TestCase
         // insert data
         $insert = $dbh->prepare('INSERT INTO test_basic (name, number, active, deleted) VALUES(?, ?, ?, ?)');
 
-        $insert->execute(array('Lorem', 10, 1, 0));
-        $insert->execute(array('ipsum', 17, 1, 0));
-        $insert->execute(array('dolor', 12.5, 1, 0));
-        $insert->execute(array('sit amet', -10, 1, 0));
-        $insert->execute(array('Deleted', 0, 0, 1));
-        $insert->execute(array('Inactive', 0, 0, 0));
+        $insert->execute(['Lorem', 10, 1, 0]);
+        $insert->execute(['ipsum', 17, 1, 0]);
+        $insert->execute(['dolor', 12.5, 1, 0]);
+        $insert->execute(['sit amet', -10, 1, 0]);
+        $insert->execute(['Deleted', 0, 0, 1]);
+        $insert->execute(['Inactive', 0, 0, 0]);
 
         // count with query builder
         $query = TestBasic::query()->where('active', true)->where('deleted', false)->orderByAsc('number');

@@ -118,8 +118,8 @@ class SQLiteTest extends TestCase
             ->where('active', true)
             ->where('deleted', 0) // FIXME does not accept false!
             ->whereNotNull('name')
-            ->whereRaw('name = ?', array($model->name))
-            ->whereIn('name', array('Lorem', 'ipsum', 'QueryBuilder'))
+            ->whereRaw('name = ?', [$model->name])
+            ->whereIn('name', ['Lorem', 'ipsum', 'QueryBuilder'])
             ->whereGt('number', 0)
             ->whereGte('number', 5)
             ->whereLt('number', 90)

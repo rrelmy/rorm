@@ -24,20 +24,20 @@ abstract class Model implements Iterator, JsonSerializable
     public static $_autoId = true;
 
     /** @var array */
-    public static $_ignoreColumns = array();
+    public static $_ignoreColumns = [];
 
     /** @var string */
     public static $_connection = Rorm::CONNECTION_DEFAULT;
 
     /** @var array */
-    public $_data = array();
+    public $_data = [];
 
     /**
      * @return string
      */
     public static function getTable()
     {
-        if (isset(static::$_table)) {
+        if (static::$_table !== null) {
             return static::$_table;
         }
 
@@ -46,6 +46,7 @@ abstract class Model implements Iterator, JsonSerializable
 
     /**
      * @return \PDO
+     * @throws \Rorm\Exception
      */
     public static function getDatabase()
     {
@@ -67,7 +68,7 @@ abstract class Model implements Iterator, JsonSerializable
     public static function find($id)
     {
         $query = static::query();
-        call_user_func_array(array($query, 'whereId'), func_get_args());
+        call_user_func_array([$query, 'whereId'], func_get_args());
         return $query->findOne();
     }
 
@@ -92,7 +93,7 @@ abstract class Model implements Iterator, JsonSerializable
      * @param array $params
      * @return Query
      */
-    public static function customQuery($query, array $params = array())
+    public static function customQuery($query, array $params = [])
     {
         $ormQuery = new Query(static::class, static::getDatabase());
         $ormQuery->setQuery($query);
@@ -108,7 +109,7 @@ abstract class Model implements Iterator, JsonSerializable
     public function getId()
     {
         if (is_array(static::$_idColumn)) {
-            $result = array();
+            $result = [];
             foreach (static::$_idColumn as $key) {
                 $result[$key] = $this->get($key);
             }
@@ -152,10 +153,7 @@ abstract class Model implements Iterator, JsonSerializable
         $quoteIdentifier = Rorm::getIdentifierQuoter($dbh);
         $quotedTable = $quoteIdentifier(static::getTable());
 
-        $idColumns = static::$_idColumn;
-        if (!is_array($idColumns)) {
-            $idColumns = array($idColumns);
-        }
+        $idColumns = (array)static::$_idColumn;
         $doMerge = $this->hasId();
 
         // ignore fields
@@ -175,8 +173,8 @@ abstract class Model implements Iterator, JsonSerializable
              */
             $sql = 'INSERT INTO ' . $quotedTable . ' ';
 
-            $insertData = array();
-            $updateData = array();
+            $insertData = [];
+            $updateData = [];
 
             foreach ($this->_data as $column => $value) {
                 if (in_array($column, $notSetFields)) {
@@ -226,7 +224,7 @@ abstract class Model implements Iterator, JsonSerializable
             }
 
             // build (column) VALUES (values)
-            $quotedData = array();
+            $quotedData = [];
             foreach ($this->_data as $column => $value) {
                 if (in_array($column, $notSetFields)) {
                     continue;
@@ -261,12 +259,9 @@ abstract class Model implements Iterator, JsonSerializable
         $dbh = static::getDatabase();
         $quoteIdentifier = Rorm::getIdentifierQuoter($dbh);
 
-        $idColumns = static::$_idColumn;
-        if (!is_array($idColumns)) {
-            $idColumns = array($idColumns);
-        }
+        $idColumns = (array)static::$_idColumn;
 
-        $where = array();
+        $where = [];
         foreach ($idColumns as $columnName) {
             $where[] = $quoteIdentifier($columnName) . ' = ' . Rorm::quote($dbh, $this->$columnName);
         }
@@ -277,6 +272,7 @@ abstract class Model implements Iterator, JsonSerializable
     }
 
     // data access
+
     /**
      * @return array
      */
@@ -374,7 +370,7 @@ abstract class Model implements Iterator, JsonSerializable
      * @param array|Traversable $object
      * @param array $except
      */
-    public function copyDataFrom($object, array $except = array())
+    public function copyDataFrom($object, array $except = [])
     {
         foreach ($object as $key => $value) {
             if (!in_array($key, $except)) {
@@ -419,6 +415,7 @@ abstract class Model implements Iterator, JsonSerializable
     }
 
     // JsonSerializable
+
     /**
      * @return mixed
      */

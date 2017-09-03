@@ -47,7 +47,7 @@ class Rorm
      */
     public static function isMySQL(PDO $dbh)
     {
-        return $dbh->getAttribute(PDO::ATTR_DRIVER_NAME) == 'mysql';
+        return $dbh->getAttribute(PDO::ATTR_DRIVER_NAME) === 'mysql';
     }
 
     /**
@@ -56,7 +56,7 @@ class Rorm
      */
     public static function isSQLite(PDO $dbh)
     {
-        return $dbh->getAttribute(PDO::ATTR_DRIVER_NAME) == 'sqlite';
+        return $dbh->getAttribute(PDO::ATTR_DRIVER_NAME) === 'sqlite';
     }
 
     /**
@@ -93,7 +93,7 @@ class Rorm
      */
     public static function getIdentifierQuoter(PDO $dbh = null)
     {
-        $dbh = $dbh ? $dbh : static::getDatabase();
+        $dbh = $dbh ?: static::getDatabase();
 
         if (static::isMySQL($dbh)) {
             // mysql mode

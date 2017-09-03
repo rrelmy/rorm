@@ -21,5 +21,5 @@ class TestBasic extends Model
     public static $_table = 'test_basic';
 
     /** @var array */
-    public static $_ignoreColumns = array('modified');
+    public static $_ignoreColumns = ['modified'];
 }
