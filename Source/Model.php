@@ -49,11 +49,17 @@ abstract class Model implements Iterator, JsonSerializable
         return Rorm::getDatabase(static::$_connection);
     }
 
+    /**
+     * @return static
+     */
     public static function create(): Model
     {
         return new static();
     }
 
+    /**
+     * @return static
+     */
     public static function find($id): ?Model
     {
         $query = static::query();
