@@ -17,6 +17,7 @@ use Rorm\Model;
  * @property float $number
  * @property bool $active
  * @property bool $deleted
+ * @property int $ignored_column
  */
 class ModelSQLite extends Model
 {
@@ -28,4 +29,7 @@ class ModelSQLite extends Model
 
     /** @var string */
     public static $_connection = 'sqlite';
+
+    /** @var array */
+    public static $_ignoreColumns = ['ignored_column'];
 }

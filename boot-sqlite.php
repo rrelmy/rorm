@@ -23,7 +23,8 @@ $setupDatabaseSQLite = function () {
              email TEXT UNIQUE,
              number REAL,
              active INTEGER,
-             deleted INTEGER
+             deleted INTEGER,
+             ignored_column INTEGER
         );'
     );
     $dbh->exec('DROP TABLE IF EXISTS modelsqlitecompound');

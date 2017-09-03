@@ -65,6 +65,7 @@ class SQLiteTest extends TestCase
         $model->number = 10.75;
         $model->active = true;
         $model->deleted = false;
+        $model->ignored_column = 1337;
         $this->assertTrue($model->save());
 
         $this->assertNotEmpty($model->rowid);
@@ -76,6 +77,7 @@ class SQLiteTest extends TestCase
 
         $this->assertEquals($model->name, $modelLoaded->name);
         $this->assertEquals($model->number, $modelLoaded->number);
+        $this->assertEmpty($modelLoaded->ignored_column);
 
         // update
         $model->name = 'Lorem ipsum';
