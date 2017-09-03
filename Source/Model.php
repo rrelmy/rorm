@@ -94,7 +94,9 @@ abstract class Model implements Iterator, JsonSerializable
     {
         if (is_array(static::$_idColumn)) {
             $result = [];
-            foreach (static::$_idColumn as $key) {
+            /** @var string[] $columns */
+            $columns = static::$_idColumn;
+            foreach ($columns as $key) {
                 $result[$key] = $this->get($key);
             }
             return $result;
@@ -106,7 +108,9 @@ abstract class Model implements Iterator, JsonSerializable
     public function hasId(): bool
     {
         if (is_array(static::$_idColumn)) {
-            foreach (static::$_idColumn as $key) {
+            /** @var string[] $columns */
+            $columns = static::$_idColumn;
+            foreach ($columns as $key) {
                 $value = $this->get($key);
                 if (empty($value)) {
                     return false;
@@ -157,14 +161,14 @@ abstract class Model implements Iterator, JsonSerializable
             $updateData = [];
 
             foreach ($this->_data as $column => $value) {
-                if (in_array($column, $notSetFields)) {
+                if (in_array($column, $notSetFields, true)) {
                     continue;
                 }
 
                 $quotedColumn = $quoteIdentifier($column);
                 $insertData[$quotedColumn] = Rorm::quote($dbh, $value);
 
-                if ($doMerge && !in_array($column, $idColumns)) {
+                if ($doMerge && !in_array($column, $idColumns, true)) {
                     $updateData[] = $quotedColumn . ' = VALUES(' . $quotedColumn . ')';
                 }
             }
@@ -206,7 +210,7 @@ abstract class Model implements Iterator, JsonSerializable
             // build (column) VALUES (values)
             $quotedData = [];
             foreach ($this->_data as $column => $value) {
-                if (in_array($column, $notSetFields)) {
+                if (in_array($column, $notSetFields, true)) {
                     continue;
                 }
 
@@ -309,7 +313,7 @@ abstract class Model implements Iterator, JsonSerializable
     public function copyDataFrom($object, array $except = []): void
     {
         foreach ($object as $key => $value) {
-            if (!in_array($key, $except)) {
+            if (!in_array($key, $except, true)) {
                 $this->set($key, $value);
             }
         }

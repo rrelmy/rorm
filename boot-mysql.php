@@ -41,6 +41,6 @@ $setupDatabaseMySQL = function () {
             PRIMARY KEY(foo_id, bar_id)
         );'
     );
-
 };
+
 $setupDatabaseMySQL();
