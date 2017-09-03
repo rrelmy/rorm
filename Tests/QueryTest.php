@@ -1,13 +1,19 @@
 <?php
-namespace RormTest;
-
-use PHPUnit_Framework_TestCase;
-use Rorm\Query;
-
 /**
  * @author: remy
  */
-class QueryTest extends PHPUnit_Framework_TestCase
+
+namespace RormTest;
+
+use PHPUnit\Framework\TestCase;
+use Rorm\Query;
+use RormTest\Model\TestBasic;
+
+/**
+ * Class QueryTest
+ * @package RormTest
+ */
+class QueryTest extends TestCase
 {
     public function testConstruct()
     {
@@ -52,8 +58,8 @@ class QueryTest extends PHPUnit_Framework_TestCase
      */
     public function testCreateInstanceModel()
     {
-        $query = new Query('Test_Basic');
-        /** @var \Test_Basic $instance */
+        $query = new Query(TestBasic::class);
+        /** @var TestBasic $instance */
         $instance = $query->instanceFromObject(
             array(
                 'id' => 7,
@@ -64,7 +70,7 @@ class QueryTest extends PHPUnit_Framework_TestCase
             )
         );
 
-        $this->assertInstanceOf('Test_Basic', $instance);
+        $this->assertInstanceOf(TestBasic::class, $instance);
         $this->assertEquals(7, $instance->id);
         $this->assertEquals('Test', $instance->name);
         $this->assertEquals(75.3, $instance->number);

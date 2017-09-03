@@ -1,24 +1,29 @@
 <?php
+/**
+ * @author: remy
+ */
 
 namespace RormTest;
 
-use PHPUnit_Framework_TestCase;
-use RormTest\Test\DifferentIdField;
+use PHPUnit\Framework\TestCase;
+use RormTest\Model\Compound;
+use RormTest\Model\DifferentIdField;
+use RormTest\Model\TestBasic;
 use stdClass;
-use Test_Basic;
 
 /**
+ * Class ModelBasicTest
+ * @package RormTest
+ *
  * testing the data access and write methods
  * the extended class tests for the database stuff
- *
- * @author: remy
  */
-class ModelBasicTest extends PHPUnit_Framework_TestCase
+class ModelBasicTest extends TestCase
 {
 
     public function testSetterGetter()
     {
-        $object = Test_Basic::create();
+        $object = TestBasic::create();
 
         $this->assertEmpty($object->getData());
 
@@ -33,7 +38,7 @@ class ModelBasicTest extends PHPUnit_Framework_TestCase
      */
     public function testSetMultiple()
     {
-        $object = Test_Basic::create();
+        $object = TestBasic::create();
         $object->setData(
             array(
                 'id' => 10,
@@ -49,7 +54,7 @@ class ModelBasicTest extends PHPUnit_Framework_TestCase
      */
     public function testHas()
     {
-        $object = Test_Basic::create();
+        $object = TestBasic::create();
         $object->name = 'foo';
         $this->assertTrue(isset($object->name));
         $this->assertFalse(isset($object->doesNotExist));
@@ -60,7 +65,7 @@ class ModelBasicTest extends PHPUnit_Framework_TestCase
      */
     public function testRemove()
     {
-        $object = Test_Basic::create();
+        $object = TestBasic::create();
 
         $object->set('name', 'foo');
         $this->assertTrue(isset($object->name));
@@ -73,7 +78,7 @@ class ModelBasicTest extends PHPUnit_Framework_TestCase
      */
     public function testIterator()
     {
-        $object = Test_Basic::create();
+        $object = TestBasic::create();
         $object->setData(
             array(
                 'id' => 1,
@@ -108,7 +113,7 @@ class ModelBasicTest extends PHPUnit_Framework_TestCase
      */
     public function testCopyModel()
     {
-        $a = Test_Basic::create();
+        $a = TestBasic::create();
         $a->setData(
             array(
                 'id' => 1,
@@ -117,7 +122,7 @@ class ModelBasicTest extends PHPUnit_Framework_TestCase
             )
         );
 
-        $b = Test_Basic::create();
+        $b = TestBasic::create();
         $b->copyDataFrom($a);
         $this->assertEquals($a->getData(), $b->getData());
     }
@@ -132,7 +137,7 @@ class ModelBasicTest extends PHPUnit_Framework_TestCase
         $a->name = 'ipsum';
         $a->active = true;
 
-        $b = Test_Basic::create();
+        $b = TestBasic::create();
         $b->copyDataFrom($a);
 
         $this->assertEquals($b->id, 1);
@@ -145,7 +150,7 @@ class ModelBasicTest extends PHPUnit_Framework_TestCase
      */
     public function testJsonEncode()
     {
-        $a = Test_Basic::create();
+        $a = TestBasic::create();
         $data = array(
             'id' => 1,
             'name' => 'ipsum',
@@ -163,7 +168,7 @@ class ModelBasicTest extends PHPUnit_Framework_TestCase
     public function testGetAndHasId()
     {
         // normal id
-        $a = Test_Basic::create();
+        $a = TestBasic::create();
         $this->assertFalse($a->hasId());
         $a->set('id', 768);
         $this->assertTrue($a->hasId());
@@ -177,7 +182,7 @@ class ModelBasicTest extends PHPUnit_Framework_TestCase
         $this->assertEquals(98765, $a->getId());
 
         // compound keys
-        $compoundModel = Test\Compound::create();
+        $compoundModel = Compound::create();
         $this->assertFalse($compoundModel->hasId());
         $compoundModel->setData(
             array(

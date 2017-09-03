@@ -17,6 +17,15 @@
       "Rorm\\": "Source"
     }
   },
+  "autoload-dev": {
+    "psr-4": {
+      "RormTest\\": [
+        "Tests",
+        "TestsMySQL",
+        "TestsSQLite"
+      ]
+    }
+  },
   "require-dev": {
     "phpunit/phpunit": "6.3"
   }

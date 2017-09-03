@@ -2,16 +2,18 @@
 /**
  * @author: remy
  */
+
 namespace RormTest;
 
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 use Rorm\Model;
 use Rorm\Rorm;
 
 /**
  * Class RormTest
+ * @package RormTest
  */
-class RormTest extends PHPUnit_Framework_TestCase
+class RormTest extends TestCase
 {
 
     public function testDefaultConnection()

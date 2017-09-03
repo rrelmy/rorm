@@ -2,7 +2,8 @@
 /**
  * @author: remy
  */
-namespace RormTest\Test;
+
+namespace RormTest\Model;
 
 use Rorm\Model;
 

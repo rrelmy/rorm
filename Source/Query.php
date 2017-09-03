@@ -36,7 +36,7 @@ class Query
     public function __construct($class = 'stdClass', PDO $dbh = null)
     {
         $this->class = $class;
-        $this->classIsOrmModel = is_subclass_of($this->class, '\\Rorm\\Model');
+        $this->classIsOrmModel = is_subclass_of($this->class, Model::class);
         $this->dbh = $dbh ? $dbh : Rorm::getDatabase();
     }
 

@@ -2,11 +2,15 @@
 /**
  * @author: remy
  */
+
 namespace RormTest;
 
 use Rorm\Model;
 
 /**
+ * Class ModelSQLite
+ * @package RormTest
+ * 
  * @property int $rowid
  * @property string $name
  * @property string $email

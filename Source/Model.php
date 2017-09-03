@@ -6,8 +6,8 @@
 namespace Rorm;
 
 use Iterator;
-use Traversable;
 use JsonSerializable;
+use Traversable;
 
 /**
  * Class Model
@@ -41,7 +41,7 @@ abstract class Model implements Iterator, JsonSerializable
             return static::$_table;
         }
 
-        return strtolower(str_replace('\\', '_', get_called_class()));
+        return strtolower(str_replace('\\', '_', static::class));
     }
 
     /**
@@ -84,7 +84,7 @@ abstract class Model implements Iterator, JsonSerializable
      */
     public static function query()
     {
-        return new QueryBuilder(static::getTable(), static::$_idColumn, get_called_class(), static::getDatabase());
+        return new QueryBuilder(static::getTable(), static::$_idColumn, static::class, static::getDatabase());
     }
 
     /**
@@ -94,7 +94,7 @@ abstract class Model implements Iterator, JsonSerializable
      */
     public static function customQuery($query, array $params = array())
     {
-        $ormQuery = new Query(get_called_class(), static::getDatabase());
+        $ormQuery = new Query(static::class, static::getDatabase());
         $ormQuery->setQuery($query);
         if (!empty($params)) {
             $ormQuery->setParams($params);

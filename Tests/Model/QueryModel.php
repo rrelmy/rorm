@@ -2,19 +2,21 @@
 /**
  * @author: remy
  */
+namespace RormTest\Model;
+
 use Rorm\Model;
 
 /**
+ * Class QueryModel
+ *
  * @property int $id
  * @property string $name
- * @property string $email
  * @property float $number
  * @property string $modified
  * @property bool $active
  * @property bool $deleted
  */
-class Test_Basic extends Model
+class QueryModel extends Model
 {
-    /** @var array */
-    public static $_ignoreColumns = array('modified');
+    public static $_table = 'test';
 }

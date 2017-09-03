@@ -1,16 +1,23 @@
 <?php
+/**
+ * @author: remy
+ */
+
 namespace RormTest;
 
 use Exception;
 use PDO;
 use PDOException;
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
+use Rorm\QueryBuilder;
+use Rorm\QueryIterator;
 use Rorm\Rorm;
 
 /**
- * @author: remy
+ * Class SQLiteTest
+ * @package RormTest
  */
-class SQLiteTest extends PHPUnit_Framework_TestCase
+class SQLiteTest extends TestCase
 {
     public function testDbDriver()
     {
@@ -52,7 +59,7 @@ class SQLiteTest extends PHPUnit_Framework_TestCase
     public function testBasic()
     {
         $model = ModelSQLite::create();
-        $this->assertInstanceOf('\\RormTest\\ModelSQLite', $model);
+        $this->assertInstanceOf(ModelSQLite::class, $model);
 
         $model->name = 'Lorem';
         $model->number = 10.75;
@@ -65,7 +72,7 @@ class SQLiteTest extends PHPUnit_Framework_TestCase
         // load
         $modelLoaded = ModelSQLite::find($model->rowid);
         $this->assertNotEmpty($modelLoaded);
-        $this->assertInstanceOf('\\RormTest\\ModelSQLite', $modelLoaded);
+        $this->assertInstanceOf(ModelSQLite::class, $modelLoaded);
 
         $this->assertEquals($model->name, $modelLoaded->name);
         $this->assertEquals($model->number, $modelLoaded->number);
@@ -100,7 +107,7 @@ class SQLiteTest extends PHPUnit_Framework_TestCase
 
         // query data
         $query = ModelSQLite::query();
-        $this->assertInstanceOf('\\Rorm\\QueryBuilder', $query);
+        $this->assertInstanceOf(QueryBuilder::class, $query);
 
         $query
             ->selectAll()
@@ -122,7 +129,7 @@ class SQLiteTest extends PHPUnit_Framework_TestCase
             ->offset(0);
 
         $queryModel = $query->findOne();
-        $this->assertInstanceOf('\\RormTest\\ModelSQLite', $queryModel);
+        $this->assertInstanceOf(ModelSQLite::class, $queryModel);
         $this->assertEquals($model->getId(), $queryModel->getId());
 
         // test boolean parameters
@@ -172,7 +179,7 @@ class SQLiteTest extends PHPUnit_Framework_TestCase
 
         // query one
         $model = ModelSQLiteCompound::find(5, 10);
-        $this->assertInstanceOf('\\RormTest\\ModelSQLiteCompound', $model);
+        $this->assertInstanceOf(ModelSQLiteCompound::class, $model);
         $this->assertEquals(5, $model->foo_id);
         $this->assertEquals(10, $model->bar_id);
 
@@ -182,13 +189,13 @@ class SQLiteTest extends PHPUnit_Framework_TestCase
         $query->orderByAsc('foo_id');
         $result = $query->findMany();
 
-        $this->assertInstanceOf('\\Rorm\\QueryIterator', $result);
+        $this->assertInstanceOf(QueryIterator::class, $result);
 
         foreach ($result as $model) {
             /** @var ModelSQLiteCompound $model */
 
             // check if correct model
-            $this->assertInstanceOf('\\RormTest\\ModelSQLiteCompound', $model);
+            $this->assertInstanceOf(ModelSQLiteCompound::class, $model);
 
             // check if not filtered item
             $this->assertNotEquals($model1->foo_id, $model->foo_id);
@@ -198,8 +205,8 @@ class SQLiteTest extends PHPUnit_Framework_TestCase
         $result = ModelSQLiteCompound::findAll();
         $this->assertInternalType('array', $result);
         $this->assertNotEmpty($result);
-        $this->assertContainsOnlyInstancesOf('\\RormTest\\ModelSQLiteCompound', $result);
-        $this->assertEquals(3, count($result));
+        $this->assertContainsOnlyInstancesOf(ModelSQLiteCompound::class, $result);
+        $this->assertCount(3, $result);
     }
 
     /**
@@ -212,12 +219,12 @@ class SQLiteTest extends PHPUnit_Framework_TestCase
         $this->assertNotEmpty($result);
 
         foreach ($result as $model) {
-            $this->assertInstanceOf('\\RormTest\\ModelSQLiteCompound', $model);
+            $this->assertInstanceOf(ModelSQLiteCompound::class, $model);
         }
 
         // here the exception should get thrown
         foreach ($result as $model) {
-            $this->assertInstanceOf('\\RormTest\\ModelSQLiteCompound', $model);
+            $this->assertInstanceOf(ModelSQLiteCompound::class, $model);
         }
     }
 

@@ -1,18 +1,24 @@
 <?php
+/**
+ * @author: remy
+ */
 
 namespace RormTest;
 
 use Exception;
 use PDOException;
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
+use Rorm\QueryBuilder;
+use Rorm\QueryIterator;
 use Rorm\Rorm;
-use RormTest\Test\Compound;
-use Test_Basic;
+use RormTest\Model\Compound;
+use RormTest\Model\TestBasic;
 
 /**
- * @author: remy
+ * Class QueryDatabaseBasicTest
+ * @package RormTest
  */
-class QueryDatabaseBasicTest extends PHPUnit_Framework_TestCase
+class QueryDatabaseBasicTest extends TestCase
 {
     public function testDbDriver()
     {
@@ -44,7 +50,7 @@ class QueryDatabaseBasicTest extends PHPUnit_Framework_TestCase
      */
     public function testSaveEmpty()
     {
-        Test_Basic::create()->save();
+        TestBasic::create()->save();
     }
 
     /**
@@ -52,7 +58,7 @@ class QueryDatabaseBasicTest extends PHPUnit_Framework_TestCase
      */
     public function testCustomQueryError()
     {
-        $query = Test_Basic::customQuery('SELECT PLAIN WRONG QUERY;');
+        $query = TestBasic::customQuery('SELECT PLAIN WRONG QUERY;');
         $query->findOne();
     }
 
@@ -62,12 +68,12 @@ class QueryDatabaseBasicTest extends PHPUnit_Framework_TestCase
     public function testBasic()
     {
         // find empty
-        $this->assertFalse(!!Test_Basic::query()->findColumn());
-        $this->assertFalse(!!Test_Basic::query()->findOne());
+        $this->assertEmpty(TestBasic::query()->findColumn());
+        $this->assertEmpty(TestBasic::query()->findOne());
 
         // create entry
-        $model = Test_Basic::create();
-        $this->assertInstanceOf('Test_Basic', $model);
+        $model = TestBasic::create();
+        $this->assertInstanceOf(TestBasic::class, $model);
 
         $model->name = 'Lorem';
         $model->number = 10.75;
@@ -78,9 +84,9 @@ class QueryDatabaseBasicTest extends PHPUnit_Framework_TestCase
         $this->assertNotEmpty($model->id);
 
         // load
-        $modelLoaded = Test_Basic::find($model->id);
+        $modelLoaded = TestBasic::find($model->id);
         $this->assertNotEmpty($modelLoaded);
-        $this->assertInstanceOf('Test_Basic', $modelLoaded);
+        $this->assertInstanceOf(TestBasic::class, $modelLoaded);
 
         $this->assertEquals($model->name, $modelLoaded->name);
         $this->assertEquals($model->number, $modelLoaded->number);
@@ -92,7 +98,7 @@ class QueryDatabaseBasicTest extends PHPUnit_Framework_TestCase
         $this->assertTrue($model->save());
 
         // re load
-        $modelLoaded = Test_Basic::find($model->id);
+        $modelLoaded = TestBasic::find($model->id);
         $this->assertEquals($model->id, $modelLoaded->id);
         $this->assertNull($modelLoaded->active, 'remove() should remove the data');
 
@@ -100,11 +106,11 @@ class QueryDatabaseBasicTest extends PHPUnit_Framework_TestCase
         sleep(1.2);
 
         // update loaded (test ignore fields)
-        $modelLoaded->number += 1;
+        ++$modelLoaded->number;
         $this->assertTrue($modelLoaded->save());
         $this->assertEquals(11.75, $modelLoaded->number);
 
-        $modelLoadedAgain = Test_Basic::find($model->id);
+        $modelLoadedAgain = TestBasic::find($model->id);
         $this->assertEquals($model->name, $modelLoadedAgain->name);
         $this->assertNotEquals($modelLoaded->modified, $modelLoadedAgain->modified);
 
@@ -113,7 +119,7 @@ class QueryDatabaseBasicTest extends PHPUnit_Framework_TestCase
         $this->assertTrue($model->delete());
 
         // re load empty
-        $this->assertNull(Test_Basic::find($model->id));
+        $this->assertNull(TestBasic::find($model->id));
     }
 
     /**
@@ -122,14 +128,14 @@ class QueryDatabaseBasicTest extends PHPUnit_Framework_TestCase
     public function testColumn()
     {
         // create some data
-        $model = Test_Basic::create();
+        $model = TestBasic::create();
         $model->name = 'QueryBuilder';
         $model->number = 17.75;
         $model->active = true;
         $model->deleted = false;
         $this->assertTrue($model->save());
 
-        $result = Test_Basic::query()->select('name')->whereId($model->id)->findColumn();
+        $result = TestBasic::query()->select('name')->whereId($model->id)->findColumn();
         $this->assertEquals('QueryBuilder', $result);
     }
 
@@ -139,7 +145,7 @@ class QueryDatabaseBasicTest extends PHPUnit_Framework_TestCase
     public function testBasicQueryBuilder()
     {
         // create some data
-        $model = Test_Basic::create();
+        $model = TestBasic::create();
         $model->name = 'QueryBuilder';
         $model->number = 17.75;
         $model->active = true;
@@ -147,8 +153,8 @@ class QueryDatabaseBasicTest extends PHPUnit_Framework_TestCase
         $this->assertTrue($model->save());
 
         // query data
-        $query = Test_Basic::query();
-        $this->assertInstanceOf('\\Rorm\\QueryBuilder', $query);
+        $query = TestBasic::query();
+        $this->assertInstanceOf(QueryBuilder::class, $query);
 
         $query
             ->selectAll()
@@ -170,7 +176,7 @@ class QueryDatabaseBasicTest extends PHPUnit_Framework_TestCase
             ->offset(0);
 
         $queryModel = $query->findOne();
-        $this->assertInstanceOf('Test_Basic', $queryModel);
+        $this->assertInstanceOf(TestBasic::class, $queryModel);
         $this->assertEquals($model->getId(), $queryModel->getId());
 
         // test boolean parameters
@@ -183,7 +189,7 @@ class QueryDatabaseBasicTest extends PHPUnit_Framework_TestCase
      */
     public function testNullIfNotFound()
     {
-        $this->assertNull(Test_Basic::find('not existing id'));
+        $this->assertNull(TestBasic::find('not existing id'));
     }
 
     /**
@@ -193,19 +199,19 @@ class QueryDatabaseBasicTest extends PHPUnit_Framework_TestCase
     public function testCompound()
     {
         // check if empty
-        $result = Test\Compound::findAll();
+        $result = Compound::findAll();
         $this->assertInternalType('array', $result);
         $this->assertEmpty($result);
 
         // create
-        $model1 = Test\Compound::create();
+        $model1 = Compound::create();
         $model1->foo_id = 5;
         $model1->bar_id = 10;
         $model1->name = '5 to 10';
         $this->assertTrue($model1->save());
 
         // create
-        $model2 = Test\Compound::create();
+        $model2 = Compound::create();
         $model2->foo_id = 7;
         $model2->bar_id = 10;
         $model2->name = '7 to 10';
@@ -220,7 +226,7 @@ class QueryDatabaseBasicTest extends PHPUnit_Framework_TestCase
 
 
         // create and delete
-        $model4 = Test\Compound::create();
+        $model4 = Compound::create();
         $model4->foo_id = 11;
         $model4->bar_id = 8;
         $model4->name = '11 to 8';
@@ -228,35 +234,35 @@ class QueryDatabaseBasicTest extends PHPUnit_Framework_TestCase
         $this->assertTrue($model4->delete());
 
         // query one
-        $model = Test\Compound::find(5, 10);
-        $this->assertInstanceOf('\\RormTest\\Test\\Compound', $model);
+        $model = Compound::find(5, 10);
+        $this->assertInstanceOf(Compound::class, $model);
         $this->assertEquals(5, $model->foo_id);
         $this->assertEquals(10, $model->bar_id);
 
         // query many
-        $query = Test\Compound::query();
+        $query = Compound::query();
         $query->whereGt('foo_id', 6);
         $query->orderByAsc('foo_id');
         $result = $query->findMany();
 
-        $this->assertInstanceOf('\\Rorm\\QueryIterator', $result);
+        $this->assertInstanceOf(QueryIterator::class, $result);
 
         foreach ($result as $model) {
             /** @var Compound $model */
 
             // check if correct model
-            $this->assertInstanceOf('\\RormTest\\Test\\Compound', $model);
+            $this->assertInstanceOf(Compound::class, $model);
 
             // check if not filtered item
             $this->assertNotEquals($model1->foo_id, $model->foo_id);
         }
 
         // query buffered
-        $result = Test\Compound::findAll();
+        $result = Compound::findAll();
         $this->assertInternalType('array', $result);
         $this->assertNotEmpty($result);
-        $this->assertContainsOnlyInstancesOf('\\RormTest\\Test\\Compound', $result);
-        $this->assertEquals(3, count($result));
+        $this->assertContainsOnlyInstancesOf(Compound::class, $result);
+        $this->assertCount(3, $result);
     }
 
     // TODO check querybuilder with compound keys
@@ -271,18 +277,18 @@ class QueryDatabaseBasicTest extends PHPUnit_Framework_TestCase
         $this->assertNotEmpty($result);
 
         foreach ($result as $model) {
-            $this->assertInstanceOf('\\RormTest\\Test\\Compound', $model);
+            $this->assertInstanceOf(Compound::class, $model);
         }
 
         // here the exception should get thrown
         foreach ($result as $model) {
-            $this->assertInstanceOf('\\RormTest\\Test\\Compound', $model);
+            $this->assertInstanceOf(Compound::class, $model);
         }
     }
 
     public function testCount()
     {
-        $dbh = Test_Basic::getDatabase();
+        $dbh = TestBasic::getDatabase();
 
         // clear table
         $dbh->exec('TRUNCATE TABLE test_basic;');
@@ -298,17 +304,17 @@ class QueryDatabaseBasicTest extends PHPUnit_Framework_TestCase
         $insert->execute(array('Inactive', 0, 0, 0));
 
         // count with query builder
-        $query = Test_Basic::query()->where('active', true)->where('deleted', false)->orderByAsc('number');
+        $query = TestBasic::query()->where('active', true)->where('deleted', false)->orderByAsc('number');
         $this->assertInternalType('integer', $query->count());
         $this->assertEquals(4, $query->count());
 
         // check result after count
         $model = $query->findOne();
-        $this->assertInstanceOf('Test_Basic', $model);
+        $this->assertInstanceOf(TestBasic::class, $model);
         $this->assertEquals(-10, $model->number);
 
         // count with customQuery (inefficient!)
-        $customQuery = Test_Basic::customQuery(
+        $customQuery = TestBasic::customQuery(
             'SELECT *
             FROM test_basic
             WHERE active = TRUE AND deleted = FALSE
@@ -318,7 +324,7 @@ class QueryDatabaseBasicTest extends PHPUnit_Framework_TestCase
 
         // check result after count
         $model = $customQuery->findOne();
-        $this->assertInstanceOf('Test_Basic', $model);
+        $this->assertInstanceOf(TestBasic::class, $model);
         $this->assertEquals(-10, $model->number);
     }
 
@@ -328,12 +334,12 @@ class QueryDatabaseBasicTest extends PHPUnit_Framework_TestCase
      */
     public function testUniqueKeyHandling()
     {
-        $userA = Test_Basic::create();
+        $userA = TestBasic::create();
         $userA->name = 'User A';
         $userA->email = 'info@example.org';
         $this->assertTrue($userA->save());
 
-        $userB = Test_Basic::create();
+        $userB = TestBasic::create();
         $userB->name = 'User B';
         $userB->email = 'info@example.org';
         $userB->save();

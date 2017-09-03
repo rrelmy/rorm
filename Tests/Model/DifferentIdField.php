@@ -1,5 +1,9 @@
 <?php
-namespace RormTest\Test;
+/**
+ * @author: remy
+ */
+
+namespace RormTest\Model;
 
 use Rorm\Model;
 

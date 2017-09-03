@@ -2,11 +2,15 @@
 /**
  * @author: remy
  */
+
 namespace RormTest;
 
 use Rorm\Model;
 
 /**
+ * Class ModelSQLiteCompound
+ * @package RormTest
+ *
  * @property int $foo_id
  * @property int $bar_id
  * @property string $name

@@ -1,15 +1,20 @@
 <?php
-
-namespace RormTest;
-
-use PHPUnit_Framework_TestCase;
-use RormTest\Test\Compound;
-use RormTest\Test\QueryModel;
-
 /**
  * @author: remy
  */
-class QueryBuilderBasicTest extends PHPUnit_Framework_TestCase
+
+namespace RormTest;
+
+use PHPUnit\Framework\TestCase;
+use Rorm\QueryBuilder;
+use RormTest\Model\Compound;
+use RormTest\Model\QueryModel;
+
+/**
+ * Class QueryBuilderBasicTest
+ * @package RormTest
+ */
+class QueryBuilderBasicTest extends TestCase
 {
 
     public function testSelectMethods()
@@ -23,7 +28,7 @@ class QueryBuilderBasicTest extends PHPUnit_Framework_TestCase
             ->selectExpr('YEAR(NOW())')
             ->select('count');
 
-        $this->assertInstanceOf('\\Rorm\\QueryBuilder', $query);
+        $this->assertInstanceOf(QueryBuilder::class, $query);
     }
 
     public function testWhereMethods()
@@ -43,7 +48,7 @@ class QueryBuilderBasicTest extends PHPUnit_Framework_TestCase
             ->whereRaw('`modified` < NOW()')
             ->where('id', 1);
 
-        $this->assertInstanceOf('\\Rorm\\QueryBuilder', $query);
+        $this->assertInstanceOf(QueryBuilder::class, $query);
     }
 
     public function testOrderMethods()
@@ -54,7 +59,7 @@ class QueryBuilderBasicTest extends PHPUnit_Framework_TestCase
             ->orderByDesc('modified')
             ->orderByAsc('id');
 
-        $this->assertInstanceOf('\\Rorm\\QueryBuilder', $query);
+        $this->assertInstanceOf(QueryBuilder::class, $query);
     }
 
     public function testLimitOffset()
@@ -65,7 +70,7 @@ class QueryBuilderBasicTest extends PHPUnit_Framework_TestCase
             ->offset(20)
             ->limit(110);
 
-        $this->assertInstanceOf('\\Rorm\\QueryBuilder', $query);
+        $this->assertInstanceOf(QueryBuilder::class, $query);
     }
 
     public function testBuild()
@@ -171,7 +176,7 @@ class QueryBuilderBasicTest extends PHPUnit_Framework_TestCase
             ->whereId(5, 75)
             ->build();
         $this->assertEquals(
-            'SELECT * FROM `rormtest_test_compound` WHERE `foo_id` = ? AND `bar_id` = ?',
+            'SELECT * FROM `rormtest_model_compound` WHERE `foo_id` = ? AND `bar_id` = ?',
             $queryIdCompound->getQuery()
         );
         $this->assertEquals(

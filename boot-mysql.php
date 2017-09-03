@@ -16,7 +16,7 @@ $setupDatabaseMySQL = function () {
 
     // init database
     $dbh->exec('DROP TABLE IF EXISTS test_basic;');
-    $dbh->exec('DROP TABLE IF EXISTS rormtest_test_compound;');
+    $dbh->exec('DROP TABLE IF EXISTS rormtest_model_compound;');
 
     $dbh->exec(
         'CREATE TABLE test_basic (
@@ -32,7 +32,7 @@ $setupDatabaseMySQL = function () {
     );
 
     $dbh->exec(
-        'CREATE TABLE rormtest_test_compound (
+        'CREATE TABLE rormtest_model_compound (
             foo_id INT UNSIGNED,
             bar_id INT UNSIGNED,
             name VARCHAR(255),
