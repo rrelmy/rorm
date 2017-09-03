@@ -47,10 +47,7 @@ class RormTest extends TestCase
         $this->assertEquals($dbh, Rorm::getDatabase());
     }
 
-    /**
-     * @return array
-     */
-    public function providerQuoteIdentifierMySQL()
+    public function providerQuoteIdentifierMySQL(): array
     {
         return [
             ['test', '`test`'],
@@ -61,14 +58,11 @@ class RormTest extends TestCase
     }
 
     /**
-     * @param $value
-     * @param $expected
-     *
      * @dataProvider providerQuoteIdentifierMySQL
      *
      * @fixme this test depends on a mysql database as default
      */
-    public function testQuoteIdentifierMySQL($value, $expected)
+    public function testQuoteIdentifierMySQL(string $value, string $expected)
     {
         $quoter = Rorm::getIdentifierQuoter();
         $this->assertEquals($expected, $quoter($value));
@@ -77,7 +71,7 @@ class RormTest extends TestCase
     /**
      * @return array
      */
-    public function providerQuoteIdentifier()
+    public function providerQuoteIdentifier(): array
     {
         return [
             ['test', '"test"'],
@@ -88,13 +82,10 @@ class RormTest extends TestCase
     }
 
     /**
-     * @param $value
-     * @param $expected
-     *
      * @dataProvider providerQuoteIdentifier
      * @fixme this test requires the sqlite connection
      */
-    public function testQuoteIdentifier($value, $expected)
+    public function testQuoteIdentifier(string $value, string $expected)
     {
         $quoter = Rorm::getIdentifierQuoter(Rorm::getDatabase('sqlite'));
         $this->assertEquals($expected, $quoter($value));

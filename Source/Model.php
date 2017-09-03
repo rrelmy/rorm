@@ -7,7 +7,6 @@ namespace Rorm;
 
 use Iterator;
 use JsonSerializable;
-use Traversable;
 
 /**
  * Class Model
@@ -32,10 +31,7 @@ abstract class Model implements Iterator, JsonSerializable
     /** @var array */
     public $_data = [];
 
-    /**
-     * @return string
-     */
-    public static function getTable()
+    public static function getTable(): string
     {
         if (static::$_table !== null) {
             return static::$_table;
@@ -45,27 +41,19 @@ abstract class Model implements Iterator, JsonSerializable
     }
 
     /**
-     * @return \PDO
      * @throws \Rorm\Exception
      */
-    public static function getDatabase()
+    public static function getDatabase(): \PDO
     {
         return Rorm::getDatabase(static::$_connection);
     }
 
-    /**
-     * @return static
-     */
-    public static function create()
+    public static function create(): Model
     {
         return new static();
     }
 
-    /**
-     * @param mixed $id , ...
-     * @return static
-     */
-    public static function find($id)
+    public static function find($id): ?Model
     {
         $query = static::query();
         call_user_func_array([$query, 'whereId'], func_get_args());
@@ -75,25 +63,17 @@ abstract class Model implements Iterator, JsonSerializable
     /**
      * @return static[]
      */
-    public static function findAll()
+    public static function findAll(): array
     {
         return static::query()->findAll();
     }
 
-    /**
-     * @return QueryBuilder
-     */
-    public static function query()
+    public static function query(): QueryBuilder
     {
         return new QueryBuilder(static::getTable(), static::$_idColumn, static::class, static::getDatabase());
     }
 
-    /**
-     * @param string $query
-     * @param array $params
-     * @return Query
-     */
-    public static function customQuery($query, array $params = [])
+    public static function customQuery(string $query, array $params = []): Query
     {
         $ormQuery = new Query(static::class, static::getDatabase());
         $ormQuery->setQuery($query);
@@ -103,9 +83,6 @@ abstract class Model implements Iterator, JsonSerializable
         return $ormQuery;
     }
 
-    /**
-     * @return array|mixed
-     */
     public function getId()
     {
         if (is_array(static::$_idColumn)) {
@@ -119,10 +96,7 @@ abstract class Model implements Iterator, JsonSerializable
         }
     }
 
-    /**
-     * @return bool
-     */
-    public function hasId()
+    public function hasId(): bool
     {
         if (is_array(static::$_idColumn)) {
             foreach (static::$_idColumn as $key) {
@@ -139,11 +113,10 @@ abstract class Model implements Iterator, JsonSerializable
     }
 
     /**
-     * @return bool
      * @throws QueryException
      * @throws \PDOException
      */
-    public function save()
+    public function save(): bool
     {
         if (empty($this->_data)) {
             throw new QueryException('can not save empty data!');
@@ -251,10 +224,7 @@ abstract class Model implements Iterator, JsonSerializable
         }
     }
 
-    /**
-     * @return bool
-     */
-    public function delete()
+    public function delete(): bool
     {
         $dbh = static::getDatabase();
         $quoteIdentifier = Rorm::getIdentifierQuoter($dbh);
@@ -272,28 +242,17 @@ abstract class Model implements Iterator, JsonSerializable
     }
 
     // data access
-
-    /**
-     * @return array
-     */
-    public function getData()
+    public function getData(): array
     {
         return $this->_data;
     }
 
-    /**
-     * @param array $data
-     */
-    public function setData(array $data)
+    public function setData(array $data): void
     {
         $this->_data = $data;
     }
 
-    /**
-     * @param string $name
-     * @return mixed
-     */
-    public function get($name)
+    public function get(string $name)
     {
         if (array_key_exists($name, $this->_data)) {
             return $this->_data[$name];
@@ -301,76 +260,46 @@ abstract class Model implements Iterator, JsonSerializable
         return null;
     }
 
-    /**
-     * @param string $name
-     * @param mixed $value
-     * @return $this
-     */
-    public function set($name, $value)
+    public function set(string $name, $value): Model
     {
         $this->_data[$name] = $value;
         return $this;
     }
 
-    /**
-     * @param string $name
-     * @return bool
-     */
-    public function has($name)
+    public function has(string $name): bool
     {
         return isset($this->_data[$name]);
     }
 
     /**
      * Remove data from the model
-     *
-     * @param string $name
      */
-    public function remove($name)
+    public function remove(string $name): void
     {
         $this->_data[$name] = null;
     }
 
-    /**
-     * @param string $name
-     * @return mixed
-     */
-    public function __get($name)
+    public function __get(string $name)
     {
         return $this->get($name);
     }
 
-    /**
-     * @param string $name
-     * @param mixed $value
-     */
-    public function __set($name, $value)
+    public function __set(string $name, $value): void
     {
         $this->set($name, $value);
     }
 
-    /**
-     * @param string $name
-     * @return bool
-     */
-    public function __isset($name)
+    public function __isset(string $name): bool
     {
         return $this->has($name);
     }
 
-    /**
-     * @param string $name
-     */
-    public function __unset($name)
+    public function __unset(string $name): void
     {
         $this->remove($name);
     }
 
-    /**
-     * @param array|Traversable $object
-     * @param array $except
-     */
-    public function copyDataFrom($object, array $except = [])
+    public function copyDataFrom($object, array $except = []): void
     {
         foreach ($object as $key => $value) {
             if (!in_array($key, $except)) {
@@ -380,45 +309,32 @@ abstract class Model implements Iterator, JsonSerializable
     }
 
     // Iterator
-    public function rewind()
+    public function rewind(): void
     {
         reset($this->_data);
     }
 
-    /**
-     * @return mixed
-     */
     public function current()
     {
         return current($this->_data);
     }
 
-    /**
-     * @return mixed
-     */
     public function key()
     {
         return key($this->_data);
     }
 
-    public function next()
+    public function next(): void
     {
         next($this->_data);
     }
 
-    /**
-     * @return bool
-     */
-    public function valid()
+    public function valid(): bool
     {
         return key($this->_data) !== null;
     }
 
     // JsonSerializable
-
-    /**
-     * @return mixed
-     */
     public function jsonSerialize()
     {
         return $this->_data;

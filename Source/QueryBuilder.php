@@ -43,13 +43,7 @@ class QueryBuilder extends Query
     /** @var int */
     protected $offset;
 
-    /**
-     * @param string $table
-     * @param string|array $idColumn
-     * @param string $class
-     * @param \PDO|null $dbh
-     */
-    public function __construct($table, $idColumn, $class = 'stdClass', PDO $dbh = null)
+    public function __construct(string $table, $idColumn, string $class = 'stdClass', PDO $dbh = null)
     {
         parent::__construct($class, $dbh);
 
@@ -58,61 +52,37 @@ class QueryBuilder extends Query
         $this->quoteIdentifier = Rorm::getIdentifierQuoter($this->dbh);
     }
 
-    /**
-     * @param string $identifier
-     * @return string
-     */
-    public function quoteIdentifier($identifier)
+    public function quoteIdentifier(string $identifier): string
     {
         // TODO there must be an easier way to do this without an extra variable!
         $func = $this->quoteIdentifier;
         return $func($identifier);
     }
 
-    /**
-     * @return string
-     */
-    public function getTable()
+    public function getTable(): string
     {
         return $this->table;
     }
 
     // select
-
-    /**
-     * @return $this
-     */
-    public function distinct()
+    public function distinct(): QueryBuilder
     {
         $this->distinct = true;
         return $this;
     }
 
-    /**
-     * @return $this
-     */
-    public function selectAll()
+    public function selectAll(): QueryBuilder
     {
         $this->select[] = '*';
         return $this;
     }
 
-    /**
-     * @param string $column
-     * @param string|null $as
-     * @return $this
-     */
-    public function select($column, $as = null)
+    public function select(string $column, string $as = null): QueryBuilder
     {
         return $this->selectExpr($this->quoteIdentifier($column), $as);
     }
 
-    /**
-     * @param string $expression
-     * @param string|null $as
-     * @return $this
-     */
-    public function selectExpr($expression, $as = null)
+    public function selectExpr(string $expression, string $as = null): QueryBuilder
     {
         $select = $expression;
         if ($as !== null) {
@@ -125,25 +95,14 @@ class QueryBuilder extends Query
 
 
     // where
-
-    /**
-     * @param string $column
-     * @param mixed $value
-     * @return $this
-     */
-    public function where($column, $value)
+    public function where(string $column, string $value): QueryBuilder
     {
         $this->where[] = $this->quoteIdentifier($column) . ' = ?';
         $this->buildParams[] = $value;
         return $this;
     }
 
-    /**
-     * @param string $column
-     * @param mixed $value
-     * @return $this
-     */
-    public function whereNot($column, $value)
+    public function whereNot(string $column, string $value): QueryBuilder
     {
         $this->where[] = $this->quoteIdentifier($column) . ' != ?';
         $this->buildParams[] = $value;
@@ -151,12 +110,9 @@ class QueryBuilder extends Query
     }
 
     /**
-     * @param mixed $id , ...
-     * @return $this
-     *
      * @throws QueryBuilderException
      */
-    public function whereId($id)
+    public function whereId($id): QueryBuilder
     {
         $args = func_get_args();
         if (count($args) !== count($this->idColumn)) {
@@ -172,24 +128,15 @@ class QueryBuilder extends Query
     }
 
     /**
-     * check: could be extended with optional $params
-     *
-     * @param string $column
-     * @param string $expression
-     * @return $this
+     * TODO could be extended with optional $params
      */
-    public function whereExpr($column, $expression)
+    public function whereExpr(string $column, string $expression): QueryBuilder
     {
         $this->where[] = $this->quoteIdentifier($column) . ' = ' . $expression;
         return $this;
     }
 
-    /**
-     * @param string $where
-     * @param array $params
-     * @return $this
-     */
-    public function whereRaw($where, array $params = [])
+    public function whereRaw(string $where, array $params = []): QueryBuilder
     {
         $this->where[] = $where;
         foreach ($params as $param) {
@@ -198,88 +145,47 @@ class QueryBuilder extends Query
         return $this;
     }
 
-    /**
-     * Take care, the $values gets quoted!
-     *
-     * @param string $column
-     * @param int|float|string $value
-     * @return $this
-     */
-    public function whereLt($column, $value)
+    public function whereLt(string $column, $value): QueryBuilder
     {
         $this->where[] = $this->quoteIdentifier($column) . ' < ?';
         $this->buildParams[] = $value;
         return $this;
     }
 
-    /**
-     * Take care, the $values gets quoted!
-     *
-     * @param string $column
-     * @param int|float|string $value
-     * @return $this
-     */
-    public function whereLte($column, $value)
+    public function whereLte(string $column, $value): QueryBuilder
     {
         $this->where[] = $this->quoteIdentifier($column) . ' <= ?';
         $this->buildParams[] = $value;
         return $this;
     }
 
-    /**
-     * Take care, the $values gets quoted!
-     *
-     * @param string $column
-     * @param int|float|string $value
-     * @return $this
-     */
-    public function whereGt($column, $value)
+    public function whereGt(string $column, $value): QueryBuilder
     {
         $this->where[] = $this->quoteIdentifier($column) . ' > ?';
         $this->buildParams[] = $value;
         return $this;
     }
 
-    /**
-     * Take care, the $values gets quoted!
-     *
-     * @param string $column
-     * @param int|float|string $value
-     * @return $this
-     */
-    public function whereGte($column, $value)
+    public function whereGte(string $column, $value): QueryBuilder
     {
         $this->where[] = $this->quoteIdentifier($column) . ' >= ?';
         $this->buildParams[] = $value;
         return $this;
     }
 
-    /**
-     * @param string $column
-     * @return $this
-     */
-    public function whereNotNull($column)
+    public function whereNotNull(string $column): QueryBuilder
     {
         $this->where[] = $this->quoteIdentifier($column) . ' IS NOT NULL';
         return $this;
     }
 
-    /**
-     * @param string $column
-     * @return $this
-     */
-    public function whereNull($column)
+    public function whereNull(string $column): QueryBuilder
     {
         $this->where[] = $this->quoteIdentifier($column) . ' IS NULL';
         return $this;
     }
 
-    /**
-     * @param string $column
-     * @param array $data
-     * @return $this
-     */
-    public function whereIn($column, array $data)
+    public function whereIn(string $column, array $data): QueryBuilder
     {
         $this->where[] = $this->quoteIdentifier($column) . ' IN (' .
             substr(str_repeat('?, ', count($data)), 0, -2) .
@@ -289,33 +195,19 @@ class QueryBuilder extends Query
     }
 
     // order by
-
-    /**
-     * @param string $column
-     * @return $this
-     */
-    public function orderByAsc($column)
+    public function orderByAsc(string $column): QueryBuilder
     {
         $this->order[] = $this->quoteIdentifier($column) . ' ASC';
         return $this;
     }
 
-    /**
-     * @param string $column
-     * @return $this
-     */
-    public function orderByDesc($column)
+    public function orderByDesc(string $column): QueryBuilder
     {
         $this->order[] = $this->quoteIdentifier($column) . ' DESC';
         return $this;
     }
 
-    /**
-     * @param string $expression
-     * @param array $params
-     * @return $this
-     */
-    public function orderByExpr($expression, array $params = [])
+    public function orderByExpr(string $expression, array $params = []): QueryBuilder
     {
         $this->order[] = $expression;
         $this->buildParams = array_merge($this->buildParams, $params);
@@ -323,34 +215,20 @@ class QueryBuilder extends Query
     }
 
     // limit
-
-    /**
-     * @param int $limit
-     * @return $this
-     */
-    public function limit($limit)
+    public function limit(int $limit): QueryBuilder
     {
         $this->limit = $limit;
         return $this;
     }
 
-    /**
-     * @param int $offset
-     * @return $this
-     */
-    public function offset($offset)
+    public function offset(int $offset): QueryBuilder
     {
         $this->offset = $offset;
         return $this;
     }
 
-
     // execute
-
-    /**
-     * @return $this
-     */
-    public function build()
+    public function build(): QueryBuilder
     {
         $params = [];
         $query = 'SELECT ';
@@ -399,19 +277,13 @@ class QueryBuilder extends Query
         return $this;
     }
 
-    /**
-     * @return string|null
-     */
-    public function findColumn()
+    public function findColumn(): ?string
     {
         $this->limit(1);
         $this->build();
         return parent::findColumn();
     }
 
-    /**
-     * @return object|null
-     */
     public function findOne()
     {
         $this->limit(1);
@@ -419,19 +291,13 @@ class QueryBuilder extends Query
         return parent::findOne();
     }
 
-    /**
-     * @return QueryIterator
-     */
-    public function findMany()
+    public function findMany(): QueryIterator
     {
         $this->build();
         return parent::findMany();
     }
 
-    /**
-     * @return array
-     */
-    public function findAll()
+    public function findAll(): array
     {
         $this->build();
         return parent::findAll();
@@ -440,16 +306,14 @@ class QueryBuilder extends Query
     /**
      * Count found rows
      * this method executes a COUNT(*) query
-     *
-     * @return int
      */
-    public function count()
+    public function count(): int
     {
         $select = $this->select;
         $this->select = ['COUNT(*)'];
         $count = $this->findColumn();
         $this->select = $select;
 
-        return $count === null ? null : (int)$count;
+        return (int)$count;
     }
 }

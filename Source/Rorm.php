@@ -18,21 +18,15 @@ class Rorm
     /** @var PDO[] */
     protected static $connections;
 
-    /**
-     * @param PDO $dbh
-     * @param string $connection
-     */
-    public static function setDatabase(PDO $dbh, $connection = self::CONNECTION_DEFAULT)
+    public static function setDatabase(PDO $dbh, string $connection = self::CONNECTION_DEFAULT): void
     {
         static::$connections[$connection] = $dbh;
     }
 
     /**
-     * @param string $connection
-     * @return PDO
      * @throws Exception
      */
-    public static function getDatabase($connection = self::CONNECTION_DEFAULT)
+    public static function getDatabase(string $connection = self::CONNECTION_DEFAULT): PDO
     {
         if (array_key_exists($connection, static::$connections)) {
             return static::$connections[$connection];
@@ -41,29 +35,16 @@ class Rorm
         throw new Exception('Database connection not found!');
     }
 
-    /**
-     * @param PDO $dbh
-     * @return bool
-     */
-    public static function isMySQL(PDO $dbh)
+    public static function isMySQL(PDO $dbh): bool
     {
         return $dbh->getAttribute(PDO::ATTR_DRIVER_NAME) === 'mysql';
     }
 
-    /**
-     * @param PDO $dbh
-     * @return bool
-     */
-    public static function isSQLite(PDO $dbh)
+    public static function isSQLite(PDO $dbh): bool
     {
         return $dbh->getAttribute(PDO::ATTR_DRIVER_NAME) === 'sqlite';
     }
 
-    /**
-     * @param PDO $dbh
-     * @param mixed $value
-     * @return string|integer|double
-     */
     public static function quote(PDO $dbh, $value)
     {
         if ($value === true) {
@@ -87,11 +68,8 @@ class Rorm
     /**
      * Method to quote identifiers
      * Please make sure you keep the quoter as long you are needing it.
-     *
-     * @param \PDO|null $dbh
-     * @return \Closure
      */
-    public static function getIdentifierQuoter(PDO $dbh = null)
+    public static function getIdentifierQuoter(PDO $dbh = null): ?callable
     {
         $dbh = $dbh ?: static::getDatabase();
 

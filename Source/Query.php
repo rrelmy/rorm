@@ -2,6 +2,7 @@
 /**
  * @author Rémy M. Böhler <code@rrelmy.ch>
  */
+
 namespace Rorm;
 
 use PDO;
@@ -17,9 +18,6 @@ class Query
     /** @var string */
     protected $class;
 
-    /** @var bool */
-    protected $classIsOrmModel;
-
     /** @var string */
     protected $query;
 
@@ -29,63 +27,38 @@ class Query
     /** @var \PDOStatement */
     protected $statement;
 
-    /**
-     * @param string $class
-     * @param PDO|null $dbh if null the default database connection is used
-     */
-    public function __construct($class = 'stdClass', PDO $dbh = null)
+    public function __construct(string $class = 'stdClass', PDO $dbh = null)
     {
         $this->class = $class;
-        $this->classIsOrmModel = is_subclass_of($this->class, Model::class);
         $this->dbh = $dbh ?: Rorm::getDatabase();
     }
 
-    /**
-     * @return string
-     */
-    public function getClass()
+    public function getClass(): string
     {
         return $this->class;
     }
 
-    /**
-     * @param string $query
-     */
-    public function setQuery($query)
+    public function setQuery(string $query): void
     {
         $this->query = $query;
     }
 
-    /**
-     * @return string
-     */
-    public function getQuery()
+    public function getQuery(): ?string
     {
         return $this->query;
     }
 
-    /**
-     * @param array $params
-     */
-    public function setParams(array $params)
+    public function setParams(array $params): void
     {
         $this->params = $params;
     }
 
-    /**
-     * @return array
-     */
-    public function getParams()
+    public function getParams(): ?array
     {
         return $this->params;
     }
 
-    /**
-     * @return bool
-     *
-     * @todo probably we can unset query an params to free up memory
-     */
-    protected function execute()
+    protected function execute(): bool
     {
         $this->statement = $this->dbh->prepare($this->query);
         // set fetchMode to assoc, it is easier to copy data from an array than an object
@@ -93,9 +66,6 @@ class Query
         return $this->statement->execute($this->params);
     }
 
-    /**
-     * @return object|null
-     */
     public function fetch()
     {
         $data = $this->statement->fetch();
@@ -105,15 +75,10 @@ class Query
         return null;
     }
 
-    /**
-     * @param array $data
-     * @return object
-     */
     public function instanceFromObject(array $data)
     {
         $instance = new $this->class;
-        if ($this->classIsOrmModel) {
-            /** @var \Rorm\Model $instance */
+        if ($instance instanceof Model) {
             $instance->setData($data);
         } else {
             foreach ($data as $key => $value) {
@@ -124,10 +89,7 @@ class Query
         return $instance;
     }
 
-    /**
-     * @return string|null
-     */
-    public function findColumn()
+    public function findColumn():? string
     {
         if ($this->execute()) {
             return $this->statement->fetchColumn();
@@ -137,8 +99,6 @@ class Query
 
     /**
      * Return one object
-     *
-     * @return object|null
      */
     public function findOne()
     {
@@ -158,10 +118,8 @@ class Query
      *
      * Note for PHP 5.5
      * yield could be used
-     *
-     * @return QueryIterator
      */
-    public function findMany()
+    public function findMany(): QueryIterator
     {
         $this->execute();
         return new QueryIterator($this->statement, $this);
@@ -173,10 +131,8 @@ class Query
 
     /**
      * Return an array with all objects, this can lead to heavy memory consumption
-     *
-     * @return array
      */
-    public function findAll()
+    public function findAll(): array
     {
         $result = [];
 
@@ -191,10 +147,8 @@ class Query
      * This operation is very expensive.
      *
      * PDOStatement::rowCount does not work on all drivers!
-     *
-     * @return int
      */
-    public function count()
+    public function count(): int
     {
         return count($this->findAll());
     }

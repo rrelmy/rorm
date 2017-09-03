@@ -20,17 +20,13 @@ class QueryIterator extends IteratorIterator
     /** @var bool */
     protected $used = false;
 
-    /**
-     * @param PDOStatement $iterator
-     * @param Query $caller
-     */
-    public function __construct(PDOStatement $iterator, $caller)
+    public function __construct(PDOStatement $iterator, Query $caller)
     {
         parent::__construct($iterator);
         $this->caller = $caller;
     }
 
-    public function rewind()
+    public function rewind(): void
     {
         if ($this->used) {
             throw new QueryException('Cannot traverse an already closed query');
@@ -38,7 +34,7 @@ class QueryIterator extends IteratorIterator
         parent::rewind();
     }
 
-    public function next()
+    public function next(): void
     {
         $this->used = true;
         parent::next();
@@ -46,8 +42,6 @@ class QueryIterator extends IteratorIterator
 
     /**
      * Transform plain object returned by PDOStatement to the desired model
-     *
-     * @return object
      */
     public function current()
     {
