@@ -4,17 +4,20 @@
   "minimum-stability": "stable",
   "license": "MIT",
   "authors": [
-	{
-	  "name": "Rémy M. Böhler",
-	  "email": "code@rrelmy.ch"
-	}
+    {
+      "name": "Rémy M. Böhler",
+      "email": "code@rrelmy.ch"
+    }
   ],
   "require": {
-	"php": ">=7.1.0"
+    "php": ">=7.1.0"
   },
   "autoload": {
-	"psr-4": {
-	  "Rorm\\": "Source"
-	}
+    "psr-4": {
+      "Rorm\\": "Source"
+    }
+  },
+  "require-dev": {
+    "phpunit/phpunit": "6.3"
   }
 }
