@@ -25,7 +25,7 @@ class Query
     /** @var \PDOStatement */
     protected $statement;
 
-    public function __construct(string $class = 'stdClass', PDO $dbh = null)
+    public function __construct(string $class = \stdClass::class, PDO $dbh = null)
     {
         $this->class = $class;
         $this->dbh = $dbh ?: Rorm::getDatabase();
