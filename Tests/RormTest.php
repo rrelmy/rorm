@@ -2,18 +2,13 @@
 /**
  * @author Rémy M. Böhler
  */
+declare(strict_types=1);
 
 namespace RormTest;
 
 use PHPUnit\Framework\TestCase;
 use Rorm\Rorm;
 
-/**
- * Class RormTest
- * @package RormTest
- *
- * @uses \Rorm\Rorm
- */
 class RormTest extends TestCase
 {
     protected function setUp()

@@ -9,10 +9,6 @@ namespace Rorm;
 use IteratorIterator;
 use PDOStatement;
 
-/**
- * Class QueryIterator
- * @package Rorm
- */
 class QueryIterator extends IteratorIterator
 {
     /** @var Query */

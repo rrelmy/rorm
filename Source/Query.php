@@ -8,9 +8,6 @@ namespace Rorm;
 
 use PDO;
 
-/**
- * Class Query
- */
 class Query
 {
     /** @var PDO */

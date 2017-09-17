@@ -1,6 +1,6 @@
 <?php
 /**
- * @author: remy
+ * @author Rémy M. Böhler <code@rrelmy.ch>
  */
 declare(strict_types=1);
 

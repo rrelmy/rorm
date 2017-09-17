@@ -8,10 +8,6 @@ namespace Rorm;
 
 use PDO;
 
-/**
- * Class Rorm
- * @package Rorm
- */
 class Rorm
 {
     const CONNECTION_DEFAULT = 'default';

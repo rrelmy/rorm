@@ -8,10 +8,6 @@ namespace Rorm;
 
 use PDO;
 
-/**
- * Class QueryBuilder
- * @package Rorm
- */
 class QueryBuilder extends Query
 {
     /** @var callable */

@@ -9,9 +9,6 @@ namespace Rorm;
 use Iterator;
 use JsonSerializable;
 
-/**
- * Class Model
- */
 abstract class Model implements Iterator, JsonSerializable
 {
     /** @var string */
