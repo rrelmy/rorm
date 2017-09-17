@@ -2,13 +2,22 @@
 <phpunit
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="http://schema.phpunit.de/6.3/phpunit.xsd"
+        bootstrap="./boot.php"
+        beStrictAboutTestsThatDoNotTestAnything="true"
+        beStrictAboutOutputDuringTests="true"
+        beStrictAboutCoversAnnotation="true"
         colors="true"
-        bootstrap="./boot.php">
+        verbose="true">
+
+    <logging>
+        <log type="coverage-html" target="report"/>
+    </logging>
+
     <testsuites>
         <testsuite name="Test Suite">
             <directory>./Tests/</directory>
-            <directory>./TestsMySQL/</directory>
-            <directory>./TestsSQLite/</directory>
+            <!--directory>./TestsMySQL/</directory-->
+            <!--directory>./TestsSQLite/</directory-->
         </testsuite>
     </testsuites>
 
