@@ -11,7 +11,7 @@ use PDO;
 class QueryBuilder extends Query
 {
     /** @var callable */
-    protected $quoteIdentifier;
+    protected $identifierQuoter;
 
     /** @var string */
     protected $table;
@@ -46,14 +46,12 @@ class QueryBuilder extends Query
 
         $this->table = $table;
         $this->idColumn = (array)$idColumn;
-        $this->quoteIdentifier = Rorm::getIdentifierQuoter($this->dbh);
+        $this->identifierQuoter = Rorm::getIdentifierQuoter($this->dbh);
     }
 
     public function quoteIdentifier(string $identifier): string
     {
-        // TODO there must be an easier way to do this without an extra variable!
-        $func = $this->quoteIdentifier;
-        return $func($identifier);
+        return ($this->identifierQuoter)($identifier);
     }
 
     public function getTable(): string
