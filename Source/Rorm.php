@@ -25,7 +25,7 @@ class Rorm
     }
 
     /**
-     * @throws Exception
+     * @throws ConnectionNotFoundException
      */
     public static function getDatabase(string $connection = self::CONNECTION_DEFAULT): PDO
     {
@@ -33,7 +33,7 @@ class Rorm
             return static::$connections[$connection];
         }
 
-        throw new Exception('Database connection not found!');
+        throw new ConnectionNotFoundException('Database connection not found!');
     }
 
     public static function isMySQL(PDO $dbh): bool
@@ -48,21 +48,27 @@ class Rorm
 
     public static function quote(PDO $dbh, $value)
     {
-        if ($value === true) {
+        if (is_bool($value)) {
             /**
              * MySQL has true and false literals
              * SQLite does not support boolean type nor literals
              */
-            return static::isMySQL($dbh) ? 'TRUE' : 1;
-        } elseif ($value === false) {
-            return static::isMySQL($dbh) ? 'FALSE' : 0;
-        } elseif ($value === null) {
+            if (static::isMySQL($dbh)) {
+                return $value ? 'TRUE' : 'FALSE';
+            } else {
+                return $value ? 1 : 0;
+            }
+        }
+        if ($value === null) {
             return 'NULL';
-        } elseif (is_int($value)) {
+        }
+        if (is_int($value)) {
             return (int)$value;
-        } elseif (is_float($value)) {
+        }
+        if (is_float($value)) {
             return (float)$value;
         }
+
         return $dbh->quote($value);
     }
 
@@ -85,5 +91,10 @@ class Rorm
                 return '"' . str_replace('"', '""', $identifier) . '"';
             };
         }
+    }
+
+    public static function reset()
+    {
+        static::$connections = [];
     }
 }
