@@ -64,7 +64,7 @@ class Query
         return $this->statement->execute($this->params);
     }
 
-    public function fetch()
+    protected function fetch()
     {
         $data = $this->statement->fetch();
         if ($data !== false) {
@@ -92,7 +92,7 @@ class Query
         if ($this->execute()) {
             return $this->statement->fetchColumn();
         }
-        return null; // @codeCoverageIgnore
+        return null;
     }
 
     /**
@@ -104,7 +104,7 @@ class Query
         if ($this->execute()) {
             return $this->fetch();
         }
-        return null; // @codeCoverageIgnore
+        return null;
     }
 
     /**
