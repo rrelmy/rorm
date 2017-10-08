@@ -20,28 +20,21 @@ class Helper
 
     public function quote(\PDO $dbh, $value)
     {
-        if (is_bool($value)) {
-            /**
-             * MySQL has true and false literals
-             * SQLite does not support boolean type nor literals
-             */
-            if ($this->isMySQL($dbh)) {
-                return $value ? 'TRUE' : 'FALSE';
-            }
-
-            return $value ? 1 : 0;
+        switch (true) {
+            case is_bool($value):
+                if ($this->isMySQL($dbh)) {
+                    return $value ? 'TRUE' : 'FALSE';
+                }
+                return $value ? 1 : 0;
+            case $value === null:
+                return 'NULL';
+            case is_int($value):
+                return (int)$value;
+            case is_float($value):
+                return (float)$value;
+            default:
+                return $dbh->quote($value);
         }
-        if ($value === null) {
-            return 'NULL';
-        }
-        if (is_int($value)) {
-            return (int)$value;
-        }
-        if (is_float($value)) {
-            return (float)$value;
-        }
-
-        return $dbh->quote($value);
     }
 
     /**
