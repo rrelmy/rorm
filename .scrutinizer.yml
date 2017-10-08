@@ -21,11 +21,6 @@ filter:
     - 'Tests/*'
     - 'boot.php'
 
-build:
-  environment:
-    php:
-      version: 7.1
-
 checks:
   php:
     sql_injection_vulnerabilities: true
