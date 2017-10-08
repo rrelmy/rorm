@@ -1,7 +1,7 @@
 tools:
   external_code_coverage:
     timeout: 300
-    runs: 4
+    runs: 2
   php_code_coverage: true
   php_sim: true
   php_analyzer: true
