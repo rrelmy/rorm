@@ -6,9 +6,16 @@ declare(strict_types=1);
 
 namespace RormTest;
 
-use PHPUnit\Framework\TestCase;
+use PDO;
+use PHPUnit\DbUnit\Database\Connection;
+use PHPUnit\DbUnit\DataSet\DefaultDataSet;
+use PHPUnit\DbUnit\DataSet\IDataSet;
+use PHPUnit\DbUnit\TestCase;
 use Rorm\Rorm;
 
+/**
+ * TODO proper DBUnit tests, currently only for testing travis
+ */
 class RormTest extends TestCase
 {
     protected function setUp()
@@ -230,5 +237,16 @@ class RormTest extends TestCase
 
         $quoter = Rorm::getIdentifierQuoter($connection);
         $this->assertEquals($expected, $quoter($value));
+    }
+
+    protected function getConnection(): Connection
+    {
+        $pdo = new PDO('sqlite::memory:');
+        return $this->createDefaultDBConnection($pdo, ':memory:');
+    }
+
+    protected function getDataSet(): IDataSet
+    {
+        return new DefaultDataSet();
     }
 }
