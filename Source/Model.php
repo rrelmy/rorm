@@ -24,7 +24,7 @@ abstract class Model implements Iterator, JsonSerializable
     public static $_ignoreColumns = [];
 
     /** @var string */
-    public static $_connection = Rorm::CONNECTION_DEFAULT;
+    public static $_connection;
 
     /** @var array */
     public $_data = [];
@@ -145,10 +145,6 @@ abstract class Model implements Iterator, JsonSerializable
      */
     public function save(): bool
     {
-        if (empty($this->_data)) {
-            throw new QueryException('can not save empty data!');
-        }
-
         $dbh = static::getDatabase();
         $quoteIdentifier = Rorm::getIdentifierQuoter($dbh);
         $quotedTable = $quoteIdentifier(static::getTable());

@@ -40,11 +40,11 @@ class QueryBuilder extends Query
 
     public function __construct(string $table, $idColumn, string $class = \stdClass::class, \PDO $dbh = null)
     {
-        parent::__construct($class, $dbh);
+        parent::__construct($dbh, $class);
 
         $this->table = $table;
         $this->idColumn = (array)$idColumn;
-        $this->identifierQuoter = Rorm::getIdentifierQuoter($this->dbh);
+        $this->identifierQuoter = Rorm::getIdentifierQuoter($this->connection);
     }
 
     public function quoteIdentifier(string $identifier): string
@@ -284,7 +284,7 @@ class QueryBuilder extends Query
         return parent::findOne();
     }
 
-    public function findMany(): QueryIterator
+    public function findMany()
     {
         $this->build();
         return parent::findMany();

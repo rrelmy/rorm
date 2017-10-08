@@ -8,30 +8,39 @@ namespace Rorm;
 
 class Query
 {
-    /** @var PDO */
-    protected $dbh;
+    /** @var \PDO */
+    private $connection;
 
     /** @var string */
-    protected $class;
+    private $class;
 
     /** @var string */
-    protected $query;
+    private $query;
 
     /** @var array */
-    protected $params;
+    private $params;
 
     /** @var \PDOStatement */
-    protected $statement;
+    private $statement;
 
-    public function __construct(string $class = \stdClass::class, \PDO $dbh = null)
+    /** @var ModelBuilder */
+    private $modelBuilder;
+
+    public function __construct(\PDO $connection, ModelBuilder $modelBuilder, string $class = \stdClass::class)
     {
+        $this->connection = $connection;
         $this->class = $class;
-        $this->dbh = $dbh ?: Rorm::getDatabase();
+        $this->modelBuilder = $modelBuilder;
     }
 
     public function getClass(): string
     {
         return $this->class;
+    }
+
+    public function getConnection(): \PDO
+    {
+        return $this->connection;
     }
 
     public function setQuery(string $query): void
@@ -54,15 +63,19 @@ class Query
         return $this->params;
     }
 
-    protected function execute(): bool
+    private function execute(): void
     {
-        $this->statement = $this->dbh->prepare($this->query);
+        $this->statement = $this->connection->prepare($this->query);
         // set fetchMode to assoc, it is easier to copy data from an array than an object
         $this->statement->setFetchMode(\PDO::FETCH_ASSOC);
-        return $this->statement->execute($this->params);
+
+        if (!$this->statement->execute($this->params)) {
+            // in case of the error mode does not throw exceptions we create one
+            throw new \PDOException($this->statement->errorInfo(), $this->statement->errorCode());
+        }
     }
 
-    protected function fetch()
+    private function fetch()
     {
         $data = $this->statement->fetch();
         if ($data !== false) {
@@ -73,7 +86,7 @@ class Query
 
     public function instanceFromObject(array $data)
     {
-        $instance = new $this->class;
+        $instance = $this->modelBuilder->build($this->class);
         if ($instance instanceof Model) {
             $instance->setData($data);
         } else {
@@ -87,10 +100,8 @@ class Query
 
     public function findColumn()
     {
-        if ($this->execute()) {
-            return $this->statement->fetchColumn();
-        }
-        return null;
+        $this->execute();
+        return $this->statement->fetchColumn();
     }
 
     /**
@@ -99,10 +110,8 @@ class Query
     public function findOne()
     {
         // DO NOT use rowCount to check if something was found because not all drivers support it
-        if ($this->execute()) {
-            return $this->fetch();
-        }
-        return null;
+        $this->execute();
+        return $this->fetch();
     }
 
     /**
@@ -115,14 +124,12 @@ class Query
      * Note for PHP 5.5
      * yield could be used
      */
-    public function findMany(): QueryIterator
+    public function findMany(): \Generator
     {
         $this->execute();
-        return new QueryIterator($this->statement, $this);
-        // PHP 5.5 yield version for future use
-        /*while ($object = $this->statement->fetchObject()) {
+        while ($object = $this->statement->fetchObject()) {
             yield $this->instanceFromObject($object);
-        }*/
+        }
     }
 
     /**
