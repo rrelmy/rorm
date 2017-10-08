@@ -6,13 +6,8 @@ php:
 services:
   - mysql
 
-mysql:
-  database: rorm
-  username: rorm
-  encoding: utf8
-
 install:
  - composer install
 
-before_script:
-  - echo "CREATE DATABASE rorm;\nCREATE USER 'rorm'@'localhost' IDENTIFIED BY 'secret';GRANT ALL PRIVILEGES ON *.* TO 'rorm'@'localhost' WITH GRANT OPTION;\n"  | mysql -u root
+before_install:
+  - mysql -e 'CREATE DATABASE rorm;'
