@@ -38,13 +38,19 @@ class QueryBuilder extends Query
     /** @var int */
     protected $offset;
 
-    public function __construct(string $table, $idColumn, string $class = \stdClass::class, \PDO $dbh = null)
-    {
-        parent::__construct($dbh, $class);
+    public function __construct(
+        \PDO $dbh,
+        ModelBuilder $modelBuilder,
+        string $class,
+        Helper $helper,
+        string $table,
+        $idColumn
+    ) {
+        parent::__construct($dbh, $modelBuilder, $class);
 
         $this->table = $table;
         $this->idColumn = (array)$idColumn;
-        $this->identifierQuoter = Rorm::getIdentifierQuoter($this->connection);
+        $this->identifierQuoter = $helper->getIdentifierQuoter($this->getConnection());
     }
 
     public function quoteIdentifier(string $identifier): string
@@ -264,8 +270,8 @@ class QueryBuilder extends Query
             }
         }
 
-        $this->query = $query;
-        $this->params = $params;
+        $this->setQuery($query);
+        $this->setParams($params);
 
         return $this;
     }
@@ -284,7 +290,7 @@ class QueryBuilder extends Query
         return parent::findOne();
     }
 
-    public function findMany()
+    public function findMany(): \Generator
     {
         $this->build();
         return parent::findMany();
