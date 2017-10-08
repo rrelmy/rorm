@@ -14,7 +14,7 @@ class QueryIterator extends \IteratorIterator
     /** @var bool */
     protected $used = false;
 
-    public function __construct(\PDOStatement $iterator, Query $caller)
+    public function __construct(\Traversable $iterator, Query $caller)
     {
         parent::__construct($iterator);
         $this->caller = $caller;
