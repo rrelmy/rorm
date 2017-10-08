@@ -9,6 +9,10 @@
       "email": "code@rrelmy.ch"
     }
   ],
+  "support": {
+    "issues": "https://github.com/rrelmy/rorm/issues",
+    "source": "https://github.com/rrelmy/rorm"
+  },
   "require": {
     "php": ">=7.1.0"
   },
@@ -20,9 +24,7 @@
   "autoload-dev": {
     "psr-4": {
       "RormTest\\": [
-        "Tests",
-        "TestsMySQL",
-        "TestsSQLite"
+        "Tests"
       ]
     }
   },
