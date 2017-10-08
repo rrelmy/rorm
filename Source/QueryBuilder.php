@@ -6,8 +6,6 @@ declare(strict_types=1);
 
 namespace Rorm;
 
-use PDO;
-
 class QueryBuilder extends Query
 {
     /** @var callable */
@@ -40,7 +38,7 @@ class QueryBuilder extends Query
     /** @var int */
     protected $offset;
 
-    public function __construct(string $table, $idColumn, string $class = \stdClass::class, PDO $dbh = null)
+    public function __construct(string $table, $idColumn, string $class = \stdClass::class, \PDO $dbh = null)
     {
         parent::__construct($class, $dbh);
 

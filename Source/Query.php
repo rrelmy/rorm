@@ -6,8 +6,6 @@ declare(strict_types=1);
 
 namespace Rorm;
 
-use PDO;
-
 class Query
 {
     /** @var PDO */
@@ -25,7 +23,7 @@ class Query
     /** @var \PDOStatement */
     protected $statement;
 
-    public function __construct(string $class = \stdClass::class, PDO $dbh = null)
+    public function __construct(string $class = \stdClass::class, \PDO $dbh = null)
     {
         $this->class = $class;
         $this->dbh = $dbh ?: Rorm::getDatabase();
@@ -60,7 +58,7 @@ class Query
     {
         $this->statement = $this->dbh->prepare($this->query);
         // set fetchMode to assoc, it is easier to copy data from an array than an object
-        $this->statement->setFetchMode(PDO::FETCH_ASSOC);
+        $this->statement->setFetchMode(\PDO::FETCH_ASSOC);
         return $this->statement->execute($this->params);
     }
 

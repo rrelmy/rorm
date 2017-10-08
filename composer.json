@@ -23,9 +23,7 @@
   },
   "autoload-dev": {
     "psr-4": {
-      "RormTest\\": [
-        "Tests"
-      ]
+      "Rorm\\": "Tests"
     }
   },
   "require-dev": {

@@ -29,6 +29,23 @@ abstract class Model implements Iterator, JsonSerializable
     /** @var array */
     public $_data = [];
 
+    /** @var ConnectionResolver */
+    private static $connectionResolver;
+
+    public static function setConnectionResolver(ConnectionResolver $resolver): void
+    {
+        static::$connectionResolver = $resolver;
+    }
+
+    public static function unsetConnectionResolver(): void
+    {
+        static::$connectionResolver = null;
+    }
+
+
+    /**
+     * @deprecated
+     */
     public static function getTable(): string
     {
         if (static::$_table !== null) {
@@ -40,6 +57,7 @@ abstract class Model implements Iterator, JsonSerializable
 
     /**
      * @throws \Rorm\Exception
+     * @deprecated
      */
     public static function getDatabase(): \PDO
     {
@@ -48,6 +66,7 @@ abstract class Model implements Iterator, JsonSerializable
 
     /**
      * @return static
+     * @deprecated
      */
     public static function create(): Model
     {
