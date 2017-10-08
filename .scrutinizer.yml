@@ -12,9 +12,6 @@ tools:
   php_loc:
     enabled: true
     excluded_dirs: [vendor, Tests]
-  php_cpd:
-    enabled: true
-    excluded_dirs: [vendor, Tests]
 
 filter:
   excluded_paths:
