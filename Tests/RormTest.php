@@ -1,100 +1,61 @@
 <?php
 /**
- * @author: remy
+ * @author Rémy M. Böhler
  */
-namespace RormTest;
+declare(strict_types=1);
 
-use PHPUnit_Framework_TestCase;
-use Rorm\Model;
-use Rorm\Rorm;
+namespace Rorm;
+
+use PHPUnit\Framework\TestCase;
 
 /**
- * Class RormTest
+ * @covers \Rorm\Rorm::__construct()
+ * @covers \Rorm\Rorm::setConnection()
  */
-class RormTest extends PHPUnit_Framework_TestCase
+class RormTest extends TestCase
 {
+    /** @var \PDO|\PHPUnit_Framework_MockObject_MockObject */
+    private $defaultConnection;
 
+    /** @var Rorm */
+    private $rorm;
+
+    protected function setUp()
+    {
+        $this->defaultConnection = $this->createMock(\PDO::class);
+        $this->rorm = new Rorm($this->defaultConnection);
+    }
+
+    /**
+     * @covers \Rorm\Rorm::defaultConnection()
+     * @covers \Rorm\Rorm::connection()
+     */
     public function testDefaultConnection()
     {
-        $this->assertEquals(
-            Model::$_connection,
-            Rorm::CONNECTION_DEFAULT
-        );
-    }
-
-    public function testGetDatabase()
-    {
-        $this->assertInstanceOf('PDO', Rorm::getDatabase());
+        $this->assertEquals($this->defaultConnection, $this->rorm->defaultConnection());
     }
 
     /**
-     * @expectedException \Rorm\Exception
+     * @covers \Rorm\Rorm::connection()
+     * @covers \Rorm\Rorm::setConnection()
      */
-    public function testGetUnknownDatabase()
+    public function testGetSetConnection()
     {
-        Rorm::getDatabase('unknown_connection');
+        /** @var \PDO|\PHPUnit_Framework_MockObject_MockObject $connection */
+        $connection = $this->createMock(\PDO::class);
+        $name = 'custom';
+
+        $this->rorm->setConnection($name, $connection);
+        $this->assertEquals($connection, $this->rorm->connection($name));
     }
 
     /**
-     * @depends testGetDatabase
-     */
-    public function testSetDatabase()
-    {
-        $dbh = Rorm::getDatabase();
-        Rorm::setDatabase($dbh);
-        $this->assertEquals($dbh, Rorm::getDatabase());
-    }
-
-    /**
-     * @return array
-     */
-    public function providerQuoteIdentifierMySQL()
-    {
-        return array(
-            array('test', '`test`'),
-            array('lorem ipsum', '`lorem ipsum`'),
-            array('te`st', '`te``st`'),
-            array('`test`', '```test```'),
-        );
-    }
-
-    /**
-     * @param $value
-     * @param $expected
+     * @covers \Rorm\Rorm::connection()
      *
-     * @dataProvider providerQuoteIdentifierMySQL
-     *
-     * @fixme this test depends on a mysql database as default
+     * @expectedException \Rorm\ConnectionNotFoundException
      */
-    public function testQuoteIdentifierMySQL($value, $expected)
+    public function testUnknownConnection()
     {
-        $quoter = Rorm::getIdentifierQuoter();
-        $this->assertEquals($expected, $quoter($value));
-    }
-
-    /**
-     * @return array
-     */
-    public function providerQuoteIdentifier()
-    {
-        return array(
-            array('test', '"test"'),
-            array('lorem ipsum', '"lorem ipsum"'),
-            array('te"st', '"te""st"'),
-            array('"test"', '"""test"""'),
-        );
-    }
-
-    /**
-     * @param $value
-     * @param $expected
-     *
-     * @dataProvider providerQuoteIdentifier
-     * @fixme this test requires the sqlite connection
-     */
-    public function testQuoteIdentifier($value, $expected)
-    {
-        $quoter = Rorm::getIdentifierQuoter(Rorm::getDatabase('sqlite'));
-        $this->assertEquals($expected, $quoter($value));
+        $this->rorm->connection('undefined');
     }
 }

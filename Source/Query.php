@@ -2,101 +2,80 @@
 /**
  * @author Rémy M. Böhler <code@rrelmy.ch>
  */
+declare(strict_types=1);
+
 namespace Rorm;
 
-use PDO;
-
-/**
- * Class Query
- */
 class Query
 {
-    /** @var PDO */
-    protected $dbh;
+    /** @var \PDO */
+    private $connection;
 
     /** @var string */
-    protected $class;
-
-    /** @var bool */
-    protected $classIsOrmModel;
+    private $class;
 
     /** @var string */
-    protected $query;
+    private $query;
 
     /** @var array */
-    protected $params;
+    private $params;
 
     /** @var \PDOStatement */
-    protected $statement;
+    private $statement;
 
-    /**
-     * @param string $class
-     * @param PDO|null $dbh if null the default database connection is used
-     */
-    public function __construct($class = 'stdClass', PDO $dbh = null)
+    /** @var ModelBuilder */
+    private $modelBuilder;
+
+    public function __construct(\PDO $connection, ModelBuilder $modelBuilder, string $class = \stdClass::class)
     {
+        $this->connection = $connection;
         $this->class = $class;
-        $this->classIsOrmModel = is_subclass_of($this->class, '\\Rorm\\Model');
-        $this->dbh = $dbh ? $dbh : Rorm::getDatabase();
+        $this->modelBuilder = $modelBuilder;
     }
 
-    /**
-     * @return string
-     */
-    public function getClass()
+    public function getClass(): string
     {
         return $this->class;
     }
 
-    /**
-     * @param string $query
-     */
-    public function setQuery($query)
+    public function getConnection(): \PDO
+    {
+        return $this->connection;
+    }
+
+    public function setQuery(string $query): void
     {
         $this->query = $query;
     }
 
-    /**
-     * @return string
-     */
-    public function getQuery()
+    public function getQuery(): ?string
     {
         return $this->query;
     }
 
-    /**
-     * @param array $params
-     */
-    public function setParams(array $params)
+    public function setParams(array $params): void
     {
         $this->params = $params;
     }
 
-    /**
-     * @return array
-     */
-    public function getParams()
+    public function getParams(): ?array
     {
         return $this->params;
     }
 
-    /**
-     * @return bool
-     *
-     * @todo probably we can unset query an params to free up memory
-     */
-    protected function execute()
+    private function execute(): void
     {
-        $this->statement = $this->dbh->prepare($this->query);
+        $this->statement = $this->connection->prepare($this->query);
         // set fetchMode to assoc, it is easier to copy data from an array than an object
-        $this->statement->setFetchMode(PDO::FETCH_ASSOC);
-        return $this->statement->execute($this->params);
+        $this->statement->setFetchMode(\PDO::FETCH_ASSOC);
+
+        if (!$this->statement->execute($this->params)) {
+            // in case of the error mode does not throw exceptions we create one
+            throw new \PDOException($this->statement->errorInfo(), $this->statement->errorCode());
+        }
     }
 
-    /**
-     * @return object|null
-     */
-    public function fetch()
+    private function fetch()
     {
         $data = $this->statement->fetch();
         if ($data !== false) {
@@ -105,15 +84,10 @@ class Query
         return null;
     }
 
-    /**
-     * @param array $data
-     * @return object
-     */
     public function instanceFromObject(array $data)
     {
-        $instance = new $this->class;
-        if ($this->classIsOrmModel) {
-            /** @var \Rorm\Model $instance */
+        $instance = $this->modelBuilder->build($this->class);
+        if ($instance instanceof Model) {
             $instance->setData($data);
         } else {
             foreach ($data as $key => $value) {
@@ -124,29 +98,20 @@ class Query
         return $instance;
     }
 
-    /**
-     * @return string|null
-     */
     public function findColumn()
     {
-        if ($this->execute()) {
-            return $this->statement->fetchColumn();
-        }
-        return null;
+        $this->execute();
+        return $this->statement->fetchColumn();
     }
 
     /**
      * Return one object
-     *
-     * @return object|null
      */
     public function findOne()
     {
         // DO NOT use rowCount to check if something was found because not all drivers support it
-        if ($this->execute()) {
-            return $this->fetch();
-        }
-        return null;
+        $this->execute();
+        return $this->fetch();
     }
 
     /**
@@ -158,27 +123,21 @@ class Query
      *
      * Note for PHP 5.5
      * yield could be used
-     *
-     * @return QueryIterator
      */
-    public function findMany()
+    public function findMany(): \Generator
     {
         $this->execute();
-        return new QueryIterator($this->statement, $this);
-        // PHP 5.5 yield version for future use
-        /*while ($object = $this->statement->fetchObject()) {
+        while ($object = $this->statement->fetchObject()) {
             yield $this->instanceFromObject($object);
-        }*/
+        }
     }
 
     /**
      * Return an array with all objects, this can lead to heavy memory consumption
-     *
-     * @return array
      */
-    public function findAll()
+    public function findAll(): array
     {
-        $result = array();
+        $result = [];
 
         foreach ($this->findMany() as $object) {
             $result[] = $object;
@@ -191,10 +150,8 @@ class Query
      * This operation is very expensive.
      *
      * PDOStatement::rowCount does not work on all drivers!
-     *
-     * @return int
      */
-    public function count()
+    public function count(): int
     {
         return count($this->findAll());
     }

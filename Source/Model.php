@@ -2,99 +2,96 @@
 /**
  * @author Rémy M. Böhler <code@rrelmy.ch>
  */
+declare(strict_types=1);
 
 namespace Rorm;
 
 use Iterator;
-use Traversable;
 use JsonSerializable;
 
-/**
- * Class Model
- */
 abstract class Model implements Iterator, JsonSerializable
 {
-    /** @var string */
-    public static $_table;
+    /** @var string|null */
+    protected $_table;
 
     /** @var string|array */
-    public static $_idColumn = 'id';
+    protected $_idColumn = 'id';
 
     /** @var bool */
-    public static $_autoId = true;
+    protected $_autoId = true;
 
     /** @var array */
-    public static $_ignoreColumns = array();
+    protected $_ignoreColumns = [];
 
     /** @var string */
-    public static $_connection = Rorm::CONNECTION_DEFAULT;
+    protected $_connection;
 
     /** @var array */
-    public $_data = array();
+    protected $_data = [];
 
-    /**
-     * @return string
-     */
-    public static function getTable()
+    /** @var ConnectionResolver */
+    protected static $connectionResolver;
+
+    public static function setConnectionResolver(ConnectionResolver $resolver): void
     {
-        if (isset(static::$_table)) {
-            return static::$_table;
+        static::$connectionResolver = $resolver;
+    }
+
+    public static function unsetConnectionResolver(): void
+    {
+        static::$connectionResolver = null;
+    }
+
+    public function getTable(): string
+    {
+        if ($this->_table !== null) {
+            return $this->_table;
         }
 
-        return strtolower(str_replace('\\', '_', get_called_class()));
+        return strtolower(str_replace('\\', '_', static::class));
     }
 
-    /**
-     * @return \PDO
-     */
-    public static function getDatabase()
+    public function getConnection(): \PDO
     {
-        return Rorm::getDatabase(static::$_connection);
+        return static::$connectionResolver->connection($this->_connection);
     }
 
     /**
      * @return static
      */
-    public static function create()
+    public static function find($id): ?Model
     {
-        return new static();
-    }
+        $query = (new static)->query();
+        $query->whereId(...func_get_args());
 
-    /**
-     * @param mixed $id , ...
-     * @return static
-     */
-    public static function find($id)
-    {
-        $query = static::query();
-        call_user_func_array(array($query, 'whereId'), func_get_args());
         return $query->findOne();
     }
 
     /**
      * @return static[]
      */
-    public static function findAll()
+    public static function findAll(): array
     {
-        return static::query()->findAll();
+        return (new static)->query()->findAll();
     }
 
-    /**
-     * @return QueryBuilder
-     */
-    public static function query()
+    public function query(): QueryBuilder
     {
-        return new QueryBuilder(static::getTable(), static::$_idColumn, get_called_class(), static::getDatabase());
+        // maybe pass $this?
+        return new QueryBuilder(
+            $this->getConnection(),
+            new ModelBuilder(),
+            static::class,
+            new Helper(),
+            $this->getTable(),
+            $this->_idColumn
+        );
     }
 
-    /**
-     * @param string $query
-     * @param array $params
-     * @return Query
-     */
-    public static function customQuery($query, array $params = array())
+    public function customQuery(string $query, array $params = []): Query
     {
-        $ormQuery = new Query(get_called_class(), static::getDatabase());
+        $model = new static;
+        $ormQuery = new Query($model->getConnection(), new ModelBuilder(), static::class);
         $ormQuery->setQuery($query);
         if (!empty($params)) {
             $ormQuery->setParams($params);
@@ -102,71 +99,62 @@ abstract class Model implements Iterator, JsonSerializable
         return $ormQuery;
     }
 
-    /**
-     * @return array|mixed
-     */
     public function getId()
     {
-        if (is_array(static::$_idColumn)) {
-            $result = array();
-            foreach (static::$_idColumn as $key) {
+        if (is_array($this->_idColumn)) {
+            $result = [];
+            /** @var string[] $columns */
+            $columns = $this->_idColumn;
+            foreach ($columns as $key) {
                 $result[$key] = $this->get($key);
             }
             return $result;
-        } else {
-            return $this->get(static::$_idColumn);
         }
+
+        return $this->get($this->_idColumn);
     }
 
-    /**
-     * @return bool
-     */
-    public function hasId()
+    public function hasId(): bool
     {
-        if (is_array(static::$_idColumn)) {
-            foreach (static::$_idColumn as $key) {
+        if (is_array($this->_idColumn)) {
+            /** @var string[] $columns */
+            $columns = $this->_idColumn;
+            foreach ($columns as $key) {
                 $value = $this->get($key);
                 if (empty($value)) {
                     return false;
                 }
             }
             return true;
-        } else {
-            $value = $this->get(static::$_idColumn);
-            return !empty($value);
         }
+
+        $value = $this->get($this->_idColumn);
+        return !empty($value);
     }
 
     /**
-     * @return bool
      * @throws QueryException
      * @throws \PDOException
      */
-    public function save()
+    public function save(): bool
     {
-        if (empty($this->_data)) {
-            throw new QueryException('can not save empty data!');
-        }
+        $dbh = $this->getConnection();
+        $helper = new Helper();
+        $quoteIdentifier = $helper->getIdentifierQuoter($dbh);
+        $quotedTable = $quoteIdentifier($this->getTable());
 
-        $dbh = static::getDatabase();
-        $quoteIdentifier = Rorm::getIdentifierQuoter($dbh);
-        $quotedTable = $quoteIdentifier(static::getTable());
-
-        $idColumns = static::$_idColumn;
-        if (!is_array($idColumns)) {
-            $idColumns = array($idColumns);
-        }
+        $idColumns = (array)$this->_idColumn;
         $doMerge = $this->hasId();
 
         // ignore fields
-        $notSetFields = static::$_ignoreColumns;
+        $notSetFields = $this->_ignoreColumns;
 
         /**
          * Different queries are built for each driver
          *
          * IDEA: probably split into methods (saveMySQL, saveSQLite)
          */
-        if (Rorm::isMySQL($dbh)) {
+        if ($helper->isMySQL($dbh)) {
             /**
              * MySQL
              * Instead of REPLACE INTO we use INSERT INTO ON DUPLICATE KEY UPDATE.
@@ -175,18 +163,18 @@ abstract class Model implements Iterator, JsonSerializable
              */
             $sql = 'INSERT INTO ' . $quotedTable . ' ';
 
-            $insertData = array();
-            $updateData = array();
+            $insertData = [];
+            $updateData = [];
 
             foreach ($this->_data as $column => $value) {
-                if (in_array($column, $notSetFields)) {
+                if (in_array($column, $notSetFields, true)) {
                     continue;
                 }
 
                 $quotedColumn = $quoteIdentifier($column);
-                $insertData[$quotedColumn] = Rorm::quote($dbh, $value);
+                $insertData[$quotedColumn] = $helper->quote($dbh, $value);
 
-                if ($doMerge && !in_array($column, $idColumns)) {
+                if ($doMerge && !in_array($column, $idColumns, true)) {
                     $updateData[] = $quotedColumn . ' = VALUES(' . $quotedColumn . ')';
                 }
             }
@@ -205,99 +193,84 @@ abstract class Model implements Iterator, JsonSerializable
 
             // execute (most likely throws PDOException if there is an error)
             if ($dbh->exec($sql) === false) {
-                return false;
+                return false; // @codeCoverageIgnore
             }
 
             // update generated id
-            if (static::$_autoId && !$doMerge) {
+            if ($this->_autoId && !$doMerge) {
                 // last insert id
-                $this->set(static::$_idColumn, $dbh->lastInsertId());
-            }
-
-            return true;
-        } else {
-            /**
-             * SQLite
-             */
-            if ($doMerge) {
-                $sql = 'INSERT OR REPLACE INTO ' . $quotedTable . ' ';
-            } else {
-                $sql = 'INSERT INTO ' . $quotedTable . ' ';
-            }
-
-            // build (column) VALUES (values)
-            $quotedData = array();
-            foreach ($this->_data as $column => $value) {
-                if (in_array($column, $notSetFields)) {
-                    continue;
-                }
-
-                $quotedData[$quoteIdentifier($column)] = Rorm::quote($dbh, $value);
-            }
-            unset($column, $value);
-
-            $sql .= '(' . implode(', ', array_keys($quotedData)) . ') VALUES (' . implode(', ', $quotedData) . ')';
-
-            // execute (most likely throws PDOException if there is an error)
-            if ($dbh->exec($sql) === false) {
-                return false;
-            }
-
-            // update generated id
-            if (static::$_autoId && !$this->hasId()) {
-                // last insert id
-                $this->set(static::$_idColumn, $dbh->lastInsertId());
+                $this->set($this->_idColumn, $dbh->lastInsertId());
             }
 
             return true;
         }
+
+        /**
+         * SQLite
+         */
+        if ($doMerge) {
+            $sql = 'INSERT OR REPLACE INTO ' . $quotedTable . ' ';
+        } else {
+            $sql = 'INSERT INTO ' . $quotedTable . ' ';
+        }
+
+        // build (column) VALUES (values)
+        $quotedData = [];
+        foreach ($this->_data as $column => $value) {
+            if (in_array($column, $notSetFields, true)) {
+                continue;
+            }
+
+            $quotedData[$quoteIdentifier($column)] = $helper->quote($dbh, $value);
+        }
+        unset($column, $value);
+
+        $sql .= '(' . implode(', ', array_keys($quotedData)) . ') VALUES (' . implode(', ', $quotedData) . ')';
+
+        // execute (most likely throws PDOException if there is an error)
+        if ($dbh->exec($sql) === false) {
+            return false; // @codeCoverageIgnore
+        }
+
+        // update generated id
+        if ($this->_autoId && !$this->hasId()) {
+            // last insert id
+            $this->set($this->_idColumn, $dbh->lastInsertId());
+        }
+
+        return true;
     }
 
-    /**
-     * @return bool
-     */
-    public function delete()
+    public function delete(): bool
     {
-        $dbh = static::getDatabase();
-        $quoteIdentifier = Rorm::getIdentifierQuoter($dbh);
+        $dbh = $this->getConnection();
+        $helper = new Helper();
+        $quoteIdentifier = $helper->getIdentifierQuoter($dbh);
 
-        $idColumns = static::$_idColumn;
-        if (!is_array($idColumns)) {
-            $idColumns = array($idColumns);
-        }
+        $idColumns = (array)$this->_idColumn;
 
-        $where = array();
+        $where = [];
         foreach ($idColumns as $columnName) {
-            $where[] = $quoteIdentifier($columnName) . ' = ' . Rorm::quote($dbh, $this->$columnName);
+            $where[] = $quoteIdentifier($columnName) . ' = ' . $helper->quote($dbh, $this->$columnName);
         }
 
-        $sql = 'DELETE FROM ' . $quoteIdentifier(static::getTable()) . ' WHERE ' . implode(' AND ', $where);
+        $sql = 'DELETE FROM ' . $quoteIdentifier($this->getTable()) . ' WHERE ' . implode(' AND ', $where);
 
         return $dbh->exec($sql) > 0;
     }
 
     // data access
-    /**
-     * @return array
-     */
-    public function getData()
+    public function getData(): array
     {
         return $this->_data;
     }
 
-    /**
-     * @param array $data
-     */
-    public function setData(array $data)
+    public function setData(array $data): void
     {
         $this->_data = $data;
     }
 
-    /**
-     * @param string $name
-     * @return mixed
-     */
-    public function get($name)
+    public function get(string $name)
     {
         if (array_key_exists($name, $this->_data)) {
             return $this->_data[$name];
@@ -305,123 +278,81 @@ abstract class Model implements Iterator, JsonSerializable
         return null;
     }
 
-    /**
-     * @param string $name
-     * @param mixed $value
-     * @return $this
-     */
-    public function set($name, $value)
+    public function set(string $name, $value): Model
     {
         $this->_data[$name] = $value;
         return $this;
     }
 
-    /**
-     * @param string $name
-     * @return bool
-     */
-    public function has($name)
+    public function has(string $name): bool
     {
         return isset($this->_data[$name]);
     }
 
     /**
      * Remove data from the model
-     *
-     * @param string $name
      */
-    public function remove($name)
+    public function remove(string $name): void
     {
         $this->_data[$name] = null;
     }
 
-    /**
-     * @param string $name
-     * @return mixed
-     */
-    public function __get($name)
+    public function __get(string $name)
     {
         return $this->get($name);
     }
 
-    /**
-     * @param string $name
-     * @param mixed $value
-     */
-    public function __set($name, $value)
+    public function __set(string $name, $value): void
     {
         $this->set($name, $value);
     }
 
-    /**
-     * @param string $name
-     * @return bool
-     */
-    public function __isset($name)
+    public function __isset(string $name): bool
     {
         return $this->has($name);
     }
 
-    /**
-     * @param string $name
-     */
-    public function __unset($name)
+    public function __unset(string $name): void
     {
         $this->remove($name);
     }
 
-    /**
-     * @param array|Traversable $object
-     * @param array $except
-     */
-    public function copyDataFrom($object, array $except = array())
+    public function copyDataFrom($object, array $except = []): void
     {
         foreach ($object as $key => $value) {
-            if (!in_array($key, $except)) {
+            if (!in_array($key, $except, true)) {
                 $this->set($key, $value);
             }
         }
     }
 
     // Iterator
-    public function rewind()
+    public function rewind(): void
     {
         reset($this->_data);
     }
 
-    /**
-     * @return mixed
-     */
     public function current()
     {
         return current($this->_data);
     }
 
-    /**
-     * @return mixed
-     */
     public function key()
     {
         return key($this->_data);
     }
 
-    public function next()
+    public function next(): void
     {
         next($this->_data);
     }
 
-    /**
-     * @return bool
-     */
-    public function valid()
+    public function valid(): bool
     {
         return key($this->_data) !== null;
     }
 
     // JsonSerializable
-    /**
-     * @return mixed
-     */
     public function jsonSerialize()
     {
         return $this->_data;

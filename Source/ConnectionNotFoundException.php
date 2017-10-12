@@ -6,6 +6,6 @@ declare(strict_types=1);
 
 namespace Rorm;
 
-class Exception extends \Exception
+class ConnectionNotFoundException extends Exception
 {
 }

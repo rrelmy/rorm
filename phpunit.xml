@@ -1,18 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <phpunit
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:noNamespaceSchemaLocation="http://schema.phpunit.de/4.4/phpunit.xsd"
+        xsi:noNamespaceSchemaLocation="http://schema.phpunit.de/6.3/phpunit.xsd"
+        bootstrap="./boot.php"
+        beStrictAboutOutputDuringTests="true"
+        beStrictAboutCoversAnnotation="true"
         colors="true"
-        convertErrorsToExceptions="true"
-        convertNoticesToExceptions="true"
-        convertWarningsToExceptions="true"
-        stopOnFailure="false"
-        bootstrap="./boot.php">
+        verbose="true">
+
     <testsuites>
         <testsuite name="Test Suite">
             <directory>./Tests/</directory>
-            <directory>./TestsMySQL/</directory>
-            <directory>./TestsSQLite/</directory>
         </testsuite>
     </testsuites>
 
