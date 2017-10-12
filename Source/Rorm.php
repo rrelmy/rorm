@@ -10,14 +10,14 @@ use PDO;
 
 class Rorm implements ConnectionResolver
 {
-    private $defaultConnectionName = 'default';
+    private const DEFAULT_CONNECTION_NAME = 'default';
 
     /** @var PDO[] */
     protected $connections = [];
 
     public function __construct(\PDO $defaultConnection)
     {
-        $this->setConnection($this->defaultConnectionName, $defaultConnection);
+        $this->setConnection(self::DEFAULT_CONNECTION_NAME, $defaultConnection);
     }
 
     public function register()
@@ -41,6 +41,6 @@ class Rorm implements ConnectionResolver
 
     public function defaultConnection(): \PDO
     {
-        return $this->connection($this->defaultConnectionName);
+        return $this->connection(self::DEFAULT_CONNECTION_NAME);
     }
 }
